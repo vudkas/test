@@ -17,13 +17,15 @@ def home():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    try:
-        json_str = request.get_data().decode('UTF-8')
-        update = telebot.types.Update.de_json(json_str)
-        bot.process_new_updates([update])
-        return "OK", 200
-    except Exception as e:
-        return f"Error: {e}", 400
+    if request.method == 'POST':
+        try:
+            json_str = request.get_data().decode('UTF-8')
+            update = telebot.types.Update.de_json(json_str)
+            bot.process_new_updates([update])
+            return "OK", 200
+        except Exception as e:
+            return f"Error: {e}", 400
+    return "Method Not Allowed", 405
 
 def set_webhook():
     webhook_url = "https://test-w95v.onrender.com/webhook"
