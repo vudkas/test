@@ -7,6 +7,12 @@ bot = telebot.TeleBot(token)
 
 app = Flask(__name__)
 
+# Root route to prevent 404 errors when accessing the base URL
+@app.route('/')
+def home():
+    return "Bot is up and running!"
+
+# Webhook handler for POST requests
 @app.route('/webhook', methods=['POST'])
 def webhook():
     json_str = request.get_data().decode('UTF-8')
@@ -14,6 +20,7 @@ def webhook():
     bot.process_new_updates([update])
     return '', 200
 
+# Set the webhook URL for Telegram
 def set_webhook():
     url = "https://test-w95v.onrender.com"
     bot.remove_webhook()
