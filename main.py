@@ -15,7 +15,7 @@ def webhook():
     return '', 200
 
 def set_webhook():
-    url = "https://YOUR_URL/webhook"
+    url = "https://test-w95v.onrender.com"
     bot.remove_webhook()
     bot.set_webhook(url=url)
 
