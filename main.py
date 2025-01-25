@@ -7,7 +7,9 @@ bot = telebot.TeleBot(token)
 
 app = Flask(__name__)
 
-# Root route to prevent 404 errors when accessing the base URL
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, "Hello, I'm a bot!")
 @app.route('/')
 def home():
     return "Bot is up and running!"
@@ -29,3 +31,4 @@ def set_webhook():
 if __name__ == "__main__":
     set_webhook()
     app.run(host="0.0.0.0", port=5000)
+    bot.polling()
