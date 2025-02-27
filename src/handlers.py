@@ -16,16 +16,17 @@ async def start_command(event):
     username = user.username or user.first_name or "User"
     
     welcome_message = (
-        f"👋 Welcome, {username}!\n\n"
+        f"👋 Welcome, @{username}!\n\n"
         f"I'm a Python code optimizer bot. Send me your Python code, and I'll analyze and optimize it.\n\n"
         f"✅ Just paste your code directly or use triple backticks\n"
         f"✅ I'll provide optimization recommendations and explanations\n"
         f"✅ Get detailed feedback on potential improvements"
     )
     
+    # Use only inline buttons (do not mix inline and normal buttons)
     buttons = [
         [Button.url("📣 Join Our Channel", env.channel_link)],
-        [Button.text("ℹ️ About", single_use=True), Button.text("❓ Help", single_use=True)]
+        [Button.inline("ℹ️ About", data="About"), Button.inline("❓ Help", data="Help")]
     ]
     
     await event.reply(welcome_message, buttons=buttons)
@@ -112,13 +113,11 @@ async def message_handler(event):
     else:
         code = text
     
-    # Initial response
+    # Initial response with progress indicator buttons (inline)
     waiting_message = (
-        f"⏳ Processing your code, {username}...\n\n"
-        f"I'll analyze it for optimization opportunities, security improvements, and best practices."
+        f"⏳ Processing your code, @{username}...\n\n"
+        "I'll analyze it for optimization opportunities, security improvements, and best practices."
     )
-    
-    # Add progress indicator buttons
     buttons = [[Button.url("📣 Join Our Channel", env.channel_link)]]
     processing_msg = await event.reply(waiting_message, buttons=buttons)
     
@@ -140,11 +139,11 @@ async def message_handler(event):
             optimized_code = data.get("optimized_code", "")
             explanation = data.get("explanation", "")
             
-            # Clean up the response
+            # Clean up the response: remove HTML tags and <code> tags
             clean_explanation = re.sub(r'<[^>]*>', '', explanation).strip()
             clean_code = re.sub(r'</?code>', '', optimized_code).strip()
             
-            # Format the response
+            # Format the response with custom formatting
             response = (
                 f"✅ **Code Optimization Complete**\n\n"
                 f"**Improvements:**\n{clean_explanation}\n\n"
@@ -153,13 +152,11 @@ async def message_handler(event):
             
             # Check if message is too long
             if len(response) > 4000:
-                # Truncate the code part if needed
                 summary = (
                     f"✅ **Code Optimization Complete**\n\n"
                     f"**Improvements:**\n{clean_explanation}\n\n"
                 )
-                
-                remaining_length = 4000 - len(summary) - 20  # 20 chars for markdown
+                remaining_length = 4000 - len(summary) - 20  # reserve some space for markdown formatting
                 truncated_code = clean_code[:remaining_length] + "...\n[Code truncated due to length]"
                 response = f"{summary}**Optimized Code:**\n```python\n{truncated_code}\n```"
             
@@ -169,13 +166,13 @@ async def message_handler(event):
             error_message = (
                 f"❌ **Error Processing Code**\n\n"
                 f"I couldn't optimize your code. Error: {result.get('message', 'Unknown error')}\n\n"
-                f"Please check your code and try again."
+                "Please check your code and try again."
             )
             await processing_msg.edit(error_message, buttons=buttons)
             logger.error(f"Error processing code for {username}: {result.get('message')}")
     
     except Exception as e:
-        error_message = f"❌ **Unexpected Error**\n\nAn error occurred while processing your code."
+        error_message = "❌ **Unexpected Error**\n\nAn error occurred while processing your code."
         await processing_msg.edit(error_message, buttons=buttons)
         logger.exception(f"Exception processing message from {username}: {e}")
 
