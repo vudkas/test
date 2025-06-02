@@ -27,7 +27,7 @@ class ShopifyPaymentProcessor:
             "91.108.230.8:5433:1ADM7A56GE0B:8YD2Y736XJ10",
             "178.171.106.8:5433:1ADM7A56GE0B:8YD2Y736XJ10"
         ]
-        self.user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36"
+        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         self.setup_proxy()
 
     def setup_proxy(self):
@@ -55,8 +55,16 @@ class ShopifyPaymentProcessor:
     def extract_patterns(self, text, patterns):
         results = []
         for pattern in patterns:
-            matches = re.findall(f"{pattern[0]}(.*?){pattern[1]}", text)
-            results.append(matches)
+            try:
+                # Escape special regex characters in the pattern parts
+                start_pattern = re.escape(pattern[0])
+                end_pattern = re.escape(pattern[1])
+                regex_pattern = f"{start_pattern}(.*?){end_pattern}"
+                matches = re.findall(regex_pattern, text)
+                results.append(matches)
+            except Exception as e:
+                print(f"Regex error: {str(e)}")
+                results.append([])
         return results
 
     def format_month(self, month):
