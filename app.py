@@ -45,6 +45,7 @@ processing_status = {
     'telegram_bot_token': '',
     'telegram_user_id': '',
     'shopify_url': '',
+    'custom_proxy': '',
     'stop_requested': False
 }
 
@@ -55,7 +56,7 @@ def send_telegram_message(bot_token, chat_id, message):
     """Send a message to a Telegram user"""
     return TelegramSender.send_message(bot_token, chat_id, message)
 
-def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id):
+def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, custom_proxy=None):
     """Process a list of cards in a separate thread"""
     global processing_status
     
@@ -96,7 +97,7 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id):
             
             # Process the card
             try:
-                processor = ShopifyPaymentProcessor()
+                processor = ShopifyPaymentProcessor(custom_proxy)
                 result = processor.process_payment(cc, month, year, cvv, shopify_url)
             except Exception as e:
                 result = {
@@ -134,10 +135,10 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id):
     processing_status['is_running'] = False
     processing_status['current_card'] = ''
 
-def check_proxy():
+def check_proxy(custom_proxy=None):
     """Check if proxies are working"""
     try:
-        processor = ShopifyPaymentProcessor()
+        processor = ShopifyPaymentProcessor(custom_proxy)
         response = processor.session.get('https://api.ipify.org?format=json')
         if response.status_code == 200:
             return {'status': True, 'ip': response.json().get('ip', 'Unknown')}
@@ -145,10 +146,10 @@ def check_proxy():
     except Exception as e:
         return {'status': False, 'message': str(e)}
 
-def check_shopify_url(url):
+def check_shopify_url(url, custom_proxy=None):
     """Check if the Shopify URL is valid and can add to cart"""
     try:
-        processor = ShopifyPaymentProcessor()
+        processor = ShopifyPaymentProcessor(custom_proxy)
         # Add additional headers for better compatibility
         processor.session.headers.update({
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -260,16 +261,18 @@ def index():
 
 @app.route('/api/check_proxy', methods=['POST'])
 def api_check_proxy():
-    result = check_proxy()
+    custom_proxy = request.json.get('proxy', None)
+    result = check_proxy(custom_proxy)
     return jsonify(result)
 
 @app.route('/api/check_url', methods=['POST'])
 def api_check_url():
     url = request.json.get('url', '')
+    custom_proxy = request.json.get('proxy', None)
     if not url:
         return jsonify({'status': False, 'message': 'URL is required'})
     
-    result = check_shopify_url(url)
+    result = check_shopify_url(url, custom_proxy)
     return jsonify(result)
 
 @app.route('/api/start_process', methods=['POST'])
@@ -286,6 +289,7 @@ def api_start_process():
     shopify_url = data.get('shopify_url', '')
     telegram_bot_token = data.get('telegram_bot_token', '')
     telegram_user_id = data.get('telegram_user_id', '')
+    custom_proxy = data.get('custom_proxy', '')
     
     # Validate parameters
     if not cards_text:
@@ -304,10 +308,11 @@ def api_start_process():
     processing_status['telegram_bot_token'] = telegram_bot_token
     processing_status['telegram_user_id'] = telegram_user_id
     processing_status['shopify_url'] = shopify_url
+    processing_status['custom_proxy'] = custom_proxy
     
     processing_thread = threading.Thread(
         target=process_cards,
-        args=(cards, shopify_url, telegram_bot_token, telegram_user_id)
+        args=(cards, shopify_url, telegram_bot_token, telegram_user_id, custom_proxy)
     )
     processing_thread.daemon = True
     processing_thread.start()
@@ -343,4 +348,12 @@ def api_status():
 if __name__ == '__main__':
     # Create templates directory if it doesn't exist
     os.makedirs('templates', exist_ok=True)
+    # Set CORS headers to allow iframe and cross-origin requests
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response
+        
     app.run(host='0.0.0.0', port=12000, debug=True)

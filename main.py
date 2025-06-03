@@ -9,7 +9,7 @@ import os
 from urllib.parse import urlparse, parse_qs
 
 class ShopifyPaymentProcessor:
-    def __init__(self):
+    def __init__(self, custom_proxy=None):
         self.session = requests.Session()
         self.retry_count = 0
         self.max_retries = 4
@@ -28,12 +28,34 @@ class ShopifyPaymentProcessor:
             "178.171.106.8:5433:1ADM7A56GE0B:8YD2Y736XJ10"
         ]
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        self.custom_proxy = custom_proxy
         self.setup_proxy()
 
     def setup_proxy(self):
-        proxy_str = random.choice(self.proxies)
-        parts = proxy_str.split(':')
-        proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+        if self.custom_proxy:
+            # Use custom proxy if provided
+            try:
+                parts = self.custom_proxy.split(':')
+                if len(parts) == 2:  # IP:PORT format
+                    proxy_url = f"http://{parts[0]}:{parts[1]}"
+                elif len(parts) == 4:  # IP:PORT:USER:PASS format
+                    proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+                else:
+                    # Invalid format, fall back to default proxies
+                    proxy_str = random.choice(self.proxies)
+                    parts = proxy_str.split(':')
+                    proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+            except Exception:
+                # If any error occurs, fall back to default proxies
+                proxy_str = random.choice(self.proxies)
+                parts = proxy_str.split(':')
+                proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+        else:
+            # Use random proxy from the list
+            proxy_str = random.choice(self.proxies)
+            parts = proxy_str.split(':')
+            proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+            
         self.session.proxies = {'http': proxy_url, 'https': proxy_url}
 
     def generate_random_string(self, length):

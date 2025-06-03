@@ -12,16 +12,17 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7e22ce',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                            950: '#3b0764',
                         }
                     }
                 }
@@ -35,14 +36,14 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #09090b;
         }
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #4c1d95;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #6d28d9;
         }
         
         /* Animations */
@@ -59,10 +60,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-gray-100 min-h-screen">
+<body class="bg-gray-950 text-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-center text-primary-400 mb-2">Shopify Card Checker</h1>
+            <h1 class="text-3xl font-bold text-center text-purple-400 mb-2">Shopify Card Checker</h1>
             <p class="text-center text-gray-400">Check your cards against Shopify stores</p>
         </header>
 
@@ -70,12 +71,12 @@
             <!-- Left Column: Configuration -->
             <div class="lg:col-span-1 space-y-6">
                 <!-- Shopify URL Section -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Shopify URL</h2>
                     <div class="space-y-4">
                         <div>
                             <label for="shopify-url" class="block text-sm font-medium text-gray-300 mb-1">Product URL</label>
-                            <input type="text" id="shopify-url" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://store.myshopify.com/products/item">
+                            <input type="text" id="shopify-url" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://store.myshopify.com/products/item">
                         </div>
                         <button id="check-url-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
                             Check URL
@@ -85,40 +86,47 @@
                 </div>
 
                 <!-- Proxy Section -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Proxy Settings</h2>
-                    <button id="check-proxy-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                        Check Proxy
-                    </button>
-                    <div id="proxy-result" class="hidden mt-3 p-3 rounded-md text-sm"></div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="custom-proxy" class="block text-sm font-medium text-gray-300 mb-1">Custom Proxy (optional)</label>
+                            <input type="text" id="custom-proxy" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="ip:port or ip:port:user:pass">
+                            <p class="text-xs text-gray-500 mt-1">Leave empty to use default proxies</p>
+                        </div>
+                        <button id="check-proxy-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
+                            Check Proxy
+                        </button>
+                        <div id="proxy-result" class="hidden mt-3 p-3 rounded-md text-sm"></div>
+                    </div>
                 </div>
 
                 <!-- Telegram Settings -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Telegram Notifications</h2>
                     <div class="space-y-4">
                         <div>
                             <label for="telegram-token" class="block text-sm font-medium text-gray-300 mb-1">Bot Token</label>
-                            <input type="text" id="telegram-token" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789:ABCdefGhIJKlmnOPQRstUVwxYZ">
+                            <input type="text" id="telegram-token" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789:ABCdefGhIJKlmnOPQRstUVwxYZ">
                         </div>
                         <div>
                             <label for="telegram-user-id" class="block text-sm font-medium text-gray-300 mb-1">User ID</label>
-                            <input type="text" id="telegram-user-id" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789">
+                            <input type="text" id="telegram-user-id" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789">
                         </div>
                     </div>
                 </div>
 
                 <!-- Control Buttons -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Controls</h2>
                     <div class="grid grid-cols-3 gap-3">
-                        <button id="start-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
+                        <button id="start-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg">
                             Start
                         </button>
-                        <button id="pause-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md transition duration-200" disabled>
+                        <button id="pause-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg" disabled>
                             Pause
                         </button>
-                        <button id="stop-btn" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-200" disabled>
+                        <button id="stop-btn" class="bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg" disabled>
                             Stop
                         </button>
                     </div>
@@ -128,16 +136,16 @@
             <!-- Middle Column: Cards Input -->
             <div class="lg:col-span-1 space-y-6">
                 <!-- Cards Input Section -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg h-full">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg h-full border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Cards Input</h2>
                     <div class="space-y-4">
                         <div>
                             <label for="cards-input" class="block text-sm font-medium text-gray-300 mb-1">Enter Cards (one per line)</label>
-                            <textarea id="cards-input" rows="15" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="4111111111111111|01|2025|123"></textarea>
+                            <textarea id="cards-input" rows="15" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="4111111111111111|01|2025|123"></textarea>
                         </div>
                         <div>
                             <label for="cards-file" class="block text-sm font-medium text-gray-300 mb-1">Or Upload TXT File</label>
-                            <input type="file" id="cards-file" accept=".txt" class="w-full bg-slate-700 border border-slate-600 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <input type="file" id="cards-file" accept=".txt" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
                         </div>
                         <div class="text-sm text-gray-400">
                             <p>Format: <span class="text-primary-300">CARD|MONTH|YEAR|CVV</span></p>
@@ -150,39 +158,39 @@
             <!-- Right Column: Results -->
             <div class="lg:col-span-1 space-y-6">
                 <!-- Status Section -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Status</h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-slate-700 p-3 rounded-md">
+                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
                             <p class="text-sm text-gray-400">Total Cards</p>
                             <p id="total-cards" class="text-xl font-semibold">0</p>
                         </div>
-                        <div class="bg-slate-700 p-3 rounded-md">
+                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
                             <p class="text-sm text-gray-400">Processed</p>
                             <p id="processed-cards" class="text-xl font-semibold">0</p>
                         </div>
-                        <div class="bg-slate-700 p-3 rounded-md">
+                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
                             <p class="text-sm text-gray-400">Successful</p>
-                            <p id="successful-cards" class="text-xl font-semibold text-green-500">0</p>
+                            <p id="successful-cards" class="text-xl font-semibold text-emerald-500">0</p>
                         </div>
-                        <div class="bg-slate-700 p-3 rounded-md">
+                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
                             <p class="text-sm text-gray-400">Failed</p>
-                            <p id="failed-cards" class="text-xl font-semibold text-red-500">0</p>
+                            <p id="failed-cards" class="text-xl font-semibold text-rose-500">0</p>
                         </div>
                     </div>
                     <div class="mt-4">
                         <p class="text-sm text-gray-400">Current Card</p>
-                        <p id="current-card" class="text-md font-mono bg-slate-700 p-2 rounded-md mt-1">-</p>
+                        <p id="current-card" class="text-md font-mono bg-gray-800 p-2 rounded-md mt-1 border border-gray-700">-</p>
                     </div>
                     <div class="mt-4">
-                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                        <div class="w-full bg-gray-800 rounded-full h-2.5">
                             <div id="progress-bar" class="bg-primary-600 h-2.5 rounded-full" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Results Section -->
-                <div class="bg-slate-800 rounded-lg p-4 shadow-lg">
+                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
                     <h2 class="text-xl font-semibold mb-4 text-primary-300">Results</h2>
                     <div id="results-container" class="space-y-3 max-h-96 overflow-y-auto">
                         <p class="text-gray-400 text-center">Results will appear here</p>
@@ -245,12 +253,17 @@
                 checkUrlBtn.disabled = true;
                 checkUrlBtn.textContent = 'Checking...';
                 
+                const customProxy = document.getElementById('custom-proxy').value.trim();
+                
                 fetch('/api/check_url', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ url: url }),
+                    body: JSON.stringify({ 
+                        url: url,
+                        proxy: customProxy || null
+                    }),
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -278,11 +291,14 @@
                 checkProxyBtn.disabled = true;
                 checkProxyBtn.textContent = 'Checking...';
                 
+                const customProxy = document.getElementById('custom-proxy').value.trim();
+                
                 fetch('/api/check_proxy', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    }
+                    },
+                    body: JSON.stringify({ proxy: customProxy || null })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -323,6 +339,8 @@
                 startBtn.disabled = true;
                 startBtn.textContent = 'Starting...';
                 
+                const customProxy = document.getElementById('custom-proxy').value.trim();
+                
                 fetch('/api/start_process', {
                     method: 'POST',
                     headers: {
@@ -332,7 +350,8 @@
                         shopify_url: url,
                         cards: cards,
                         telegram_bot_token: telegramTokenInput.value.trim(),
-                        telegram_user_id: telegramUserIdInput.value.trim()
+                        telegram_user_id: telegramUserIdInput.value.trim(),
+                        custom_proxy: customProxy || null
                     }),
                 })
                 .then(response => response.json())
@@ -487,10 +506,10 @@
                     }
                     
                     const cardEl = document.createElement('div');
-                    cardEl.className = 'result-card bg-slate-700 p-3 rounded-md text-sm';
+                    cardEl.className = 'result-card bg-gray-800 p-3 rounded-md text-sm border border-gray-700 shadow-md';
                     cardEl.dataset.card = result.card;
                     
-                    const statusClass = result.status ? 'text-green-500' : 'text-red-500';
+                    const statusClass = result.status ? 'text-emerald-500' : 'text-rose-500';
                     const statusIcon = result.status ? '✅' : '❌';
                     
                     cardEl.innerHTML = `
@@ -498,7 +517,7 @@
                             <div class="font-mono">${result.card}</div>
                             <div class="${statusClass} font-semibold">${statusIcon} ${result.result || 'N/A'}</div>
                         </div>
-                        <div class="mt-1 text-gray-400">${result.message || 'No message'}</div>
+                        <div class="mt-1 text-gray-300">${result.message || 'No message'}</div>
                         <div class="mt-1 text-xs text-gray-500">Gateway: ${result.gateway || 'N/A'}</div>
                     `;
                     
@@ -520,14 +539,14 @@
             // Helper to show messages
             function showMessage(element, message, type) {
                 element.innerHTML = message;
-                element.className = 'p-3 rounded-md text-sm';
+                element.className = 'p-3 rounded-md text-sm border shadow-md';
                 
                 if (type === 'error') {
-                    element.classList.add('bg-red-900', 'text-red-200');
+                    element.classList.add('bg-rose-900', 'text-rose-200', 'border-rose-800');
                 } else if (type === 'success') {
-                    element.classList.add('bg-green-900', 'text-green-200');
+                    element.classList.add('bg-emerald-900', 'text-emerald-200', 'border-emerald-800');
                 } else {
-                    element.classList.add('bg-slate-700', 'text-gray-200');
+                    element.classList.add('bg-gray-800', 'text-gray-200', 'border-gray-700');
                 }
                 
                 element.classList.remove('hidden');
