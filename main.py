@@ -167,47 +167,178 @@ class ShopifyPaymentProcessor:
             return {'status': False, 'message': f'Error: {str(e)}'}
 
     def add_to_cart(self, domain, cart_id):
-        cart_url = f"https://{domain}/cart/add.js"
-        data = f'id={cart_id}&quantity=1'
+        # Try multiple cart endpoints to ensure compatibility with different Shopify stores
+        cart_endpoints = [
+            f"https://{domain}/cart/add.js",
+            f"https://{domain}/cart/add",
+            f"https://{domain}/cart/add.json"
+        ]
         
-        response = self.session.post(cart_url, data=data)
-        
-        if '/cart' in response.text and self.retry_count < self.max_retries:
-            cart_url = f"https://{domain}/cart/add"
-            self.retry_count += 1
-            return self.add_to_cart(domain, cart_id)
-        
-        return {'success': True}
-
-    def get_checkout_url(self, domain):
-        response = self.session.get(f"https://{domain}/checkout")
-        location = self.extract_between(response.text, 'location: ', '\nx-sorting-hat-podid:')
-        if location:
-            parsed = urlparse(location.strip())
-            return f"{domain}{parsed.path}".rstrip('_')
-        return None
-
-    def submit_shipping_info(self, checkout_url, user_data):
-        auth_token = self.generate_random_string(86)
-        
-        shipping_data = {
-            '_method': 'patch',
-            'authenticity_token': auth_token,
-            'previous_step': 'contact_information',
-            'step': 'shipping_method',
-            'checkout[email]': user_data['email'],
-            'checkout[shipping_address][first_name]': user_data['first_name'],
-            'checkout[shipping_address][last_name]': user_data['last_name'],
-            'checkout[shipping_address][address1]': user_data['street'],
-            'checkout[shipping_address][city]': user_data['city'],
-            'checkout[shipping_address][country]': user_data['country'],
-            'checkout[shipping_address][province]': user_data['state'],
-            'checkout[shipping_address][zip]': user_data['zip'],
-            'checkout[shipping_address][phone]': '9006371822'
+        data = {
+            'id': cart_id,
+            'quantity': 1,
+            'form_type': 'product'
         }
         
-        response = self.session.post(f"https://{checkout_url}", data=shipping_data)
-        return {'success': response.status_code == 200}
+        for endpoint in cart_endpoints:
+            try:
+                # Try both form data and JSON formats
+                response = self.session.post(endpoint, data=data)
+                
+                # Check if the request was successful
+                if response.status_code == 200:
+                    # Check if we got a JSON response
+                    try:
+                        json_response = response.json()
+                        if 'items' in json_response or 'id' in json_response:
+                            return {'success': True, 'cart_data': json_response}
+                    except:
+                        pass
+                    
+                    # If we got redirected to the cart page, it's also a success
+                    if '/cart' in response.url:
+                        return {'success': True}
+                
+                # Try with JSON payload
+                json_response = self.session.post(endpoint, json=data)
+                if json_response.status_code == 200:
+                    return {'success': True}
+            except Exception as e:
+                print(f"Error adding to cart with {endpoint}: {str(e)}")
+                continue
+        
+        # If we've tried all endpoints and none worked, try a direct GET to the cart
+        try:
+            cart_response = self.session.get(f"https://{domain}/cart")
+            if cart_response.status_code == 200:
+                return {'success': True}
+        except:
+            pass
+            
+        # If we reach here, we couldn't add to cart
+        return {'success': False, 'message': 'Failed to add product to cart'}
+
+    def get_checkout_url(self, domain):
+        try:
+            # First try the standard checkout endpoint
+            response = self.session.get(f"https://{domain}/checkout")
+            
+            # Check if we were redirected to a checkout URL
+            if 'checkout' in response.url:
+                parsed_url = urlparse(response.url)
+                checkout_path = parsed_url.path
+                
+                # Extract the checkout token from the URL
+                if '/checkouts/' in checkout_path:
+                    return f"{domain}{checkout_path}"
+            
+            # If we didn't get redirected, try to extract the location from headers or response
+            location = None
+            
+            # Check for location in response headers
+            if 'Location' in response.headers:
+                location = response.headers['Location']
+            
+            # If not in headers, try to extract from the response text
+            if not location:
+                location = self.extract_between(response.text, 'location: ', '\n')
+                
+            if not location:
+                # Try to find checkout URL in the HTML
+                checkout_match = re.search(r'action="([^"]*\/checkout[^"]*)"', response.text)
+                if checkout_match:
+                    checkout_url = checkout_match.group(1)
+                    if checkout_url.startswith('/'):
+                        return f"{domain}{checkout_url}"
+                    return checkout_url
+            
+            # If we found a location, parse it
+            if location:
+                parsed = urlparse(location.strip())
+                if parsed.netloc:
+                    return f"{parsed.netloc}{parsed.path}".rstrip('_')
+                return f"{domain}{parsed.path}".rstrip('_')
+            
+            # If all else fails, try the cart endpoint and look for checkout links
+            cart_response = self.session.get(f"https://{domain}/cart")
+            checkout_link = re.search(r'href="([^"]*\/checkout[^"]*)"', cart_response.text)
+            if checkout_link:
+                checkout_url = checkout_link.group(1)
+                if checkout_url.startswith('/'):
+                    return f"{domain}{checkout_url}"
+                return checkout_url
+                
+            return None
+        except Exception as e:
+            print(f"Error getting checkout URL: {str(e)}")
+            return None
+
+    def submit_shipping_info(self, checkout_url, user_data):
+        try:
+            # First, get the checkout page to extract the authenticity token
+            checkout_page_url = f"https://{checkout_url}"
+            checkout_response = self.session.get(checkout_page_url)
+            
+            # Extract authenticity token from the page
+            auth_token = None
+            auth_token_match = re.search(r'name="authenticity_token" value="([^"]+)"', checkout_response.text)
+            if auth_token_match:
+                auth_token = auth_token_match.group(1)
+            else:
+                # If we can't find the token, generate a random one as fallback
+                auth_token = self.generate_random_string(86)
+            
+            # Prepare shipping data
+            shipping_data = {
+                '_method': 'patch',
+                'authenticity_token': auth_token,
+                'previous_step': 'contact_information',
+                'step': 'shipping_method',
+                'checkout[email]': user_data['email'],
+                'checkout[shipping_address][first_name]': user_data['first_name'],
+                'checkout[shipping_address][last_name]': user_data['last_name'],
+                'checkout[shipping_address][address1]': user_data['street'],
+                'checkout[shipping_address][city]': user_data['city'],
+                'checkout[shipping_address][country]': user_data['country'],
+                'checkout[shipping_address][province]': user_data['state'],
+                'checkout[shipping_address][zip]': user_data['zip'],
+                'checkout[shipping_address][phone]': '9006371822'
+            }
+            
+            # Some Shopify stores require additional fields
+            shipping_data['checkout[remember_me]'] = '0'
+            shipping_data['checkout[client_details][browser_width]'] = '1920'
+            shipping_data['checkout[client_details][browser_height]'] = '1080'
+            shipping_data['checkout[client_details][javascript_enabled]'] = '1'
+            
+            # Submit shipping information
+            response = self.session.post(checkout_page_url, data=shipping_data)
+            
+            # Check if we need to select a shipping method
+            if 'step=shipping_method' in response.url or 'shipping_method' in response.text:
+                # Extract shipping method options
+                shipping_method = None
+                shipping_method_match = re.search(r'data-shipping-method="([^"]+)"', response.text)
+                if shipping_method_match:
+                    shipping_method = shipping_method_match.group(1)
+                
+                if shipping_method:
+                    # Submit shipping method selection
+                    shipping_method_data = {
+                        '_method': 'patch',
+                        'authenticity_token': auth_token,
+                        'previous_step': 'shipping_method',
+                        'step': 'payment_method',
+                        'checkout[shipping_rate][id]': urllib.parse.unquote(shipping_method)
+                    }
+                    
+                    shipping_method_response = self.session.post(checkout_page_url, data=shipping_method_data)
+                    return {'success': shipping_method_response.status_code == 200}
+            
+            return {'success': response.status_code == 200}
+        except Exception as e:
+            print(f"Error submitting shipping info: {str(e)}")
+            return {'success': False, 'message': str(e)}
 
     def get_shipping_rates(self, checkout_url):
         time.sleep(5)
@@ -226,94 +357,248 @@ class ShopifyPaymentProcessor:
         }
 
     def process_card_payment(self, checkout_url, domain, cc, month, year, cvv, user_data):
-        rates = self.get_shipping_rates(checkout_url)
-        if not rates['shipping_method']:
-            return {'status': False, 'message': 'No shipping method available'}
+        try:
+            # Get the payment page to extract necessary tokens and gateway information
+            checkout_page_url = f"https://{checkout_url}"
+            payment_page_response = self.session.get(checkout_page_url)
+            
+            # Extract authenticity token
+            auth_token = None
+            auth_token_match = re.search(r'name="authenticity_token" value="([^"]+)"', payment_page_response.text)
+            if auth_token_match:
+                auth_token = auth_token_match.group(1)
+            else:
+                auth_token = self.generate_random_string(86)
+            
+            # Extract payment gateway
+            payment_gateway = None
+            gateway_match = re.search(r'data-select-gateway="([^"]+)"', payment_page_response.text)
+            if gateway_match:
+                payment_gateway = gateway_match.group(1)
+            
+            # If we couldn't find the payment gateway, try to get shipping rates
+            if not payment_gateway:
+                rates = self.get_shipping_rates(checkout_url)
+                payment_gateway = rates.get('payment_gateway')
+            
+            # If we still don't have a payment gateway, try to find it in other ways
+            if not payment_gateway:
+                gateway_match = re.search(r'data-gateway-name="([^"]+)"', payment_page_response.text)
+                if gateway_match:
+                    payment_gateway = gateway_match.group(1)
+            
+            # If we still don't have a payment gateway, use a default value
+            if not payment_gateway:
+                payment_gateway = "shopify_payments"
+            
+            # Format month and year
+            sub_month = self.format_month(month)
+            if len(year) <= 2:
+                year = f"20{year}"
+            
+            # Prepare card session data
+            card_session_data = {
+                "credit_card": {
+                    "number": cc,
+                    "name": f"{user_data['first_name']} {user_data['last_name']}",
+                    "month": int(sub_month),
+                    "year": int(year),
+                    "verification_value": cvv
+                },
+                "payment_session_scope": domain
+            }
+            
+            # Try multiple Shopify payment endpoints
+            session_endpoints = [
+                "https://deposit.us.shopifycs.com/sessions",
+                "https://elb.deposit.shopifycs.com/sessions",
+                "https://checkout.shopifycs.com/sessions",
+                f"https://{domain}/wallets/checkouts/{checkout_url.split('/')[-1]}/payment_sessions"
+            ]
+            
+            session_id = None
+            for endpoint in session_endpoints:
+                try:
+                    session_response = self.session.post(
+                        endpoint,
+                        json=card_session_data,
+                        headers={'Content-Type': 'application/json'}
+                    )
+                    
+                    if session_response.status_code == 200:
+                        try:
+                            session_data = session_response.json()
+                            if 'id' in session_data:
+                                session_id = session_data['id']
+                                break
+                        except:
+                            pass
+                        
+                        # Try to extract session ID from response text
+                        id_match = re.search(r'"id"\s*:\s*"([^"]+)"', session_response.text)
+                        if id_match:
+                            session_id = id_match.group(1)
+                            break
+                except Exception as e:
+                    print(f"Error with payment endpoint {endpoint}: {str(e)}")
+                    continue
+            
+            # If we couldn't get a session ID, try an alternative approach
+            if not session_id:
+                # Look for a payment form in the page
+                payment_form_match = re.search(r'<form[^>]*action="([^"]*payment[^"]*)"', payment_page_response.text)
+                if payment_form_match:
+                    payment_form_url = payment_form_match.group(1)
+                    if payment_form_url.startswith('/'):
+                        payment_form_url = f"https://{domain}{payment_form_url}"
+                    
+                    # Submit card details directly to the payment form
+                    direct_payment_data = {
+                        'credit_card[name]': f"{user_data['first_name']} {user_data['last_name']}",
+                        'credit_card[number]': cc,
+                        'credit_card[month]': sub_month,
+                        'credit_card[year]': year,
+                        'credit_card[verification_value]': cvv
+                    }
+                    
+                    direct_payment_response = self.session.post(payment_form_url, data=direct_payment_data)
+                    
+                    # Check if payment was successful
+                    if 'thank_you' in direct_payment_response.url:
+                        return {
+                            'status': True,
+                            'result': 'Approved - Charged',
+                            'message': 'Payment successful',
+                            'gateway': self.determine_gateway_type(None, checkout_url)
+                        }
+                    
+                    # If not successful, try to parse the error message
+                    error_message = None
+                    error_match = re.search(r'<div[^>]*class="[^"]*error[^"]*"[^>]*>(.*?)</div>', direct_payment_response.text, re.DOTALL)
+                    if error_match:
+                        error_message = error_match.group(1).strip()
+                        error_message = re.sub(r'<[^>]*>', '', error_message)  # Remove HTML tags
+                    
+                    return self.parse_payment_result(direct_payment_response.text, checkout_url, error_message)
+            
+            # If we have a session ID, proceed with the standard payment flow
+            if session_id:
+                payment_data = {
+                    '_method': 'patch',
+                    'authenticity_token': auth_token,
+                    'previous_step': 'payment_method',
+                    'step': '',
+                    's': session_id,
+                    'checkout[payment_gateway]': payment_gateway,
+                    'checkout[credit_card][vault]': 'false',
+                    'checkout[different_billing_address]': 'false',
+                    'checkout[remember_me]': 'false',
+                    'checkout[total]': '',  # This will be filled by the server
+                    'complete': '1'
+                }
+                
+                payment_response = self.session.post(checkout_page_url, data=payment_data)
+                
+                # Wait for payment processing
+                time.sleep(3)
+                
+                # Check if we were redirected to the thank you page
+                if 'thank_you' in payment_response.url:
+                    return {
+                        'status': True,
+                        'result': 'Approved - Charged',
+                        'message': 'Payment successful',
+                        'gateway': self.determine_gateway_type(None, checkout_url)
+                    }
+                
+                # If not, check the processing page
+                validation_response = self.session.get(f"{checkout_page_url}?from_processing_page=1&validate=true")
+                
+                return self.parse_payment_result(validation_response.text, checkout_url)
+            
+            # If we reach here, we couldn't process the payment
+            return {'status': False, 'message': 'Failed to process payment', 'result': 'Error', 'gateway': 'Unknown'}
+            
+        except Exception as e:
+            print(f"Error processing card payment: {str(e)}")
+            return {'status': False, 'message': f'Error: {str(e)}', 'result': 'Error', 'gateway': 'Unknown'}
 
-        auth_token = self.generate_random_string(86)
-        sub_month = self.format_month(month)
+    def parse_payment_result(self, response_text, checkout_url, error_message=None):
+        # First check if we have an explicit error message
+        message = error_message
         
-        card_session_data = {
-            "credit_card": {
-                "number": cc,
-                "name": f"{user_data['first_name']} {user_data['last_name']}",
-                "month": int(sub_month),
-                "year": int(year),
-                "verification_value": cvv
-            },
-            "payment_session_scope": domain
-        }
+        # If not, try to extract it from the response
+        if not message:
+            # Try multiple patterns to extract error messages
+            message_patterns = [
+                ('<p class="notice__text">', '</p></div></div>'),
+                ('<div class="notice__content">', '</div>'),
+                ('<div class="error">', '</div>'),
+                ('<div class="alert alert-danger">', '</div>'),
+                ('<span class="error-message">', '</span>'),
+                ('data-error-message="', '"')
+            ]
+            
+            for pattern in message_patterns:
+                extracted = self.extract_between(response_text, pattern[0], pattern[1])
+                if extracted:
+                    message = extracted.strip()
+                    # Remove HTML tags
+                    message = re.sub(r'<[^>]*>', '', message)
+                    message = message.strip()
+                    break
         
-        session_response = self.session.post(
-            "https://deposit.us.shopifycs.com/sessions",
-            json=card_session_data,
-            headers={'Content-Type': 'application/json'}
-        )
-        
-        session_id = self.extract_between(session_response.text, '"id":"', '"')
-        if not session_id:
-            return {'status': False, 'message': 'Failed to create payment session'}
-
-        payment_data = {
-            '_method': 'patch',
-            'authenticity_token': auth_token,
-            'previous_step': 'payment_method',
-            'step': '',
-            's': session_id,
-            'checkout[payment_gateway]': rates['payment_gateway'],
-            'complete': '1'
-        }
-        
-        payment_response = self.session.post(f"https://{checkout_url}", data=payment_data)
-        
-        time.sleep(5)
-        
-        validation_response = self.session.get(f"https://{checkout_url}?from_processing_page=1&validate=true")
-        
-        return self.parse_payment_result(validation_response.text, checkout_url)
-
-    def parse_payment_result(self, response_text, checkout_url):
-        message = self.extract_between(response_text, '<p class="notice__text">', '</p></div></div>')
-        if message:
-            message = message.strip()
-
+        # Determine the gateway type
         gateway_type = self.determine_gateway_type(message, checkout_url)
         
-        if f"https://{checkout_url}/thank_you" in response_text:
+        # Check for successful payment
+        if 'thank_you' in response_text or '/thank_you' in response_text:
             return {
                 'status': True,
                 'result': 'Approved - Charged',
                 'message': 'Payment successful',
                 'gateway': gateway_type
             }
-        elif self.is_cvv_error(message):
+        
+        # Check for various approval scenarios
+        if self.is_cvv_error(message):
             return {
                 'status': True,
                 'result': 'Approved - CVV',
-                'message': message,
+                'message': message or 'CVV verification failed but card is valid',
                 'gateway': gateway_type
             }
         elif self.is_avs_error(message):
             return {
                 'status': True,
                 'result': 'Approved - AVS',
-                'message': message,
+                'message': message or 'Address verification failed but card is valid',
                 'gateway': gateway_type
             }
         elif self.is_insufficient_funds(message):
             return {
                 'status': True,
                 'result': 'Approved - Insufficient Funds',
-                'message': message,
+                'message': message or 'Insufficient funds but card is valid',
                 'gateway': gateway_type
             }
-        else:
+        
+        # Check for 3D Secure or additional verification
+        if '3d secure' in response_text.lower() or 'verification' in response_text.lower():
             return {
-                'status': False,
-                'result': 'Declined',
-                'message': message or 'Transaction declined',
+                'status': True,
+                'result': 'Approved - 3D Secure',
+                'message': 'Card requires 3D Secure verification',
                 'gateway': gateway_type
             }
+        
+        # Default to declined
+        return {
+            'status': False,
+            'result': 'Declined',
+            'message': message or 'Transaction declined',
+            'gateway': gateway_type
+        }
 
     def determine_gateway_type(self, message, checkout_url):
         if not message:

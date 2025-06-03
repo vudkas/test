@@ -345,15 +345,20 @@ def api_pause_process():
 def api_status():
     return jsonify(processing_status)
 
+# Set CORS headers to allow iframe and cross-origin requests
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 if __name__ == '__main__':
     # Create templates directory if it doesn't exist
     os.makedirs('templates', exist_ok=True)
-    # Set CORS headers to allow iframe and cross-origin requests
-    @app.after_request
-    def after_request(response):
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        return response
-        
-    app.run(host='0.0.0.0', port=12000, debug=True)
+    
+    # Get port from environment variable for Render compatibility
+    port = int(os.environ.get('PORT', 12000))
+    
+    # Run the app
+    app.run(host='0.0.0.0', port=port, debug=False)

@@ -616,3 +616,146 @@
                 
                 resultEl.innerHTML = `
                     <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="${statusColor} font-semibold">${statusIcon} ${result.result}</span>
+                            <p class="text-gray-400 text-xs mt-1">${result.message}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-300 font-mono">${result.card}</p>
+                            <p class="text-gray-500 text-xs mt-1">${result.gateway}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-700">
+                        <span class="text-gray-500 text-xs">${result.timestamp}</span>
+                    </div>
+                `;
+                
+                resultsContainer.prepend(resultEl);
+                
+                // Limit the number of displayed results
+                if (resultsContainer.children.length > 50) {
+                    resultsContainer.lastChild.remove();
+                }
+            }
+            
+            function clearResults() {
+                resultsContainer.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto mb-4 text-gray-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <p class="text-gray-500">No results yet</p>
+                    </div>
+                `;
+            }
+            
+            function enableControls() {
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                resetButton(startBtn, 'Start');
+            }
+            
+            function resetControls() {
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                startBtn.classList.remove('glow-effect');
+                pauseBtn.classList.remove('glow-effect');
+                pauseBtn.textContent = 'Pause';
+            }
+            
+            function showMessage(element, message, type) {
+                element.innerHTML = message;
+                element.className = `p-4 rounded-xl text-sm ${type === 'error' ? 'result-error' : 'result-success'}`;
+                element.classList.remove('hidden');
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 10000);
+            }
+            
+            function setButtonLoading(button, text) {
+                button.disabled = true;
+                button.textContent = text;
+            }
+            
+            function resetButton(button, text) {
+                button.disabled = false;
+                button.textContent = text;
+            }
+            
+            function isValidShopifyUrl(url) {
+                try {
+                    const parsedUrl = new URL(url);
+                    return (
+                        (parsedUrl.hostname.includes('shopify.com') || 
+                         parsedUrl.hostname.includes('myshopify.com') ||
+                         parsedUrl.pathname.includes('/products/')) &&
+                        url.startsWith('http')
+                    );
+                } catch (e) {
+                    return false;
+                }
+            }
+            
+            function getRandomErrorMessage() {
+                const messages = [
+                    "Card declined by issuer",
+                    "Insufficient funds",
+                    "Security code invalid",
+                    "Transaction declined",
+                    "Card expired",
+                    "Invalid card number",
+                    "Processor declined",
+                    "Do not honor"
+                ];
+                return messages[Math.floor(Math.random() * messages.length)];
+            }
+            
+            function getRandomGateway() {
+                const gateways = [
+                    "Shopify + Stripe",
+                    "Shopify + Braintree",
+                    "Shopify + Adyen",
+                    "Shopify + Moneris",
+                    "Shopify + Payflow",
+                    "Shopify + Payeezy"
+                ];
+                return gateways[Math.floor(Math.random() * gateways.length)];
+            }
+            
+            function simulateApiCall(endpoint, data) {
+                return new Promise((resolve, reject) => {
+                    fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+                });
+            }
+            
+            // Initialize the UI
+            clearResults();
+            updateCardCount();
+        });
+    </script>
+</body>
+</html>
