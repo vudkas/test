@@ -23,6 +23,19 @@
                             800: '#6b21a8',
                             900: '#581c87',
                             950: '#3b0764',
+                        },
+                        dark: {
+                            50: '#18181b',
+                            100: '#161619',
+                            200: '#141417',
+                            300: '#121214',
+                            400: '#101012',
+                            500: '#0e0e10',
+                            600: '#0c0c0e',
+                            700: '#0a0a0c',
+                            800: '#08080a',
+                            900: '#060608',
+                            950: '#040406',
                         }
                     }
                 }
@@ -30,170 +43,277 @@
         }
     </script>
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
         }
         ::-webkit-scrollbar-track {
-            background: #09090b;
+            background: #040406;
+            border-radius: 5px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #4c1d95;
-            border-radius: 4px;
+            background: linear-gradient(135deg, #3b0764, #581c87);
+            border-radius: 5px;
+            border: 1px solid #1a1a1a;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #6d28d9;
+            background: linear-gradient(135deg, #581c87, #7e22ce);
         }
         
-        /* Animations */
         @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
         }
-        .animate-pulse {
+        .animate-pulse-custom {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.6); }
+        }
+        .glow-effect {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        .glass-effect {
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #040406 0%, #08080a 50%, #0c0c0e 100%);
+        }
+        
+        .card-bg {
+            background: linear-gradient(135deg, #0a0a0c 0%, #121214 100%);
+            border: 1px solid rgba(147, 51, 234, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7e22ce, #9333ea);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #9333ea, #a855f7);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            transition: all 0.3s ease;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .result-success {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .result-error {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #7e22ce, #9333ea, #a855f7);
+            box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
         }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen">
+<body class="gradient-bg text-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-center text-purple-400 mb-2">Shopify Card Checker</h1>
-            <p class="text-center text-gray-400">Check your cards against Shopify stores</p>
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent mb-3">
+                Shopify Card Checker
+            </h1>
+            <p class="text-gray-400 text-lg">Advanced card validation system</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-purple-700 mx-auto mt-4 rounded-full"></div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column: Configuration -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Shopify URL Section -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Shopify URL</h2>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <div class="xl:col-span-1 space-y-6">
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Shopify Configuration
+                    </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="shopify-url" class="block text-sm font-medium text-gray-300 mb-1">Product URL</label>
-                            <input type="text" id="shopify-url" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://store.myshopify.com/products/item">
+                            <label for="shopify-url" class="block text-sm font-semibold text-gray-300 mb-2">Product URL</label>
+                            <input type="text" id="shopify-url" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300" placeholder="https://store.myshopify.com/products/item">
                         </div>
-                        <button id="check-url-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                            Check URL
+                        <button id="check-url-btn" class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-xl">
+                            Validate URL
                         </button>
-                        <div id="url-result" class="hidden p-3 rounded-md text-sm"></div>
+                        <div id="url-result" class="hidden p-4 rounded-xl text-sm"></div>
                     </div>
                 </div>
 
-                <!-- Proxy Section -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Proxy Settings</h2>
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Proxy Configuration
+                    </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="custom-proxy" class="block text-sm font-medium text-gray-300 mb-1">Custom Proxy (optional)</label>
-                            <input type="text" id="custom-proxy" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="ip:port or ip:port:user:pass">
-                            <p class="text-xs text-gray-500 mt-1">Leave empty to use default proxies</p>
+                            <label for="custom-proxy" class="block text-sm font-semibold text-gray-300 mb-2">Custom Proxy</label>
+                            <input type="text" id="custom-proxy" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300" placeholder="ip:port:user:pass">
+                            <p class="text-xs text-gray-500 mt-2">Optional - Leave empty for default proxies</p>
                         </div>
-                        <button id="check-proxy-btn" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                            Check Proxy
+                        <button id="check-proxy-btn" class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-xl">
+                            Test Proxy
                         </button>
-                        <div id="proxy-result" class="hidden mt-3 p-3 rounded-md text-sm"></div>
+                        <div id="proxy-result" class="hidden mt-3 p-4 rounded-xl text-sm"></div>
                     </div>
                 </div>
 
-                <!-- Telegram Settings -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Telegram Notifications</h2>
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Telegram Notifications
+                    </h2>
                     <div class="space-y-4">
                         <div>
-                            <label for="telegram-token" class="block text-sm font-medium text-gray-300 mb-1">Bot Token</label>
-                            <input type="text" id="telegram-token" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789:ABCdefGhIJKlmnOPQRstUVwxYZ">
+                            <label for="telegram-token" class="block text-sm font-semibold text-gray-300 mb-2">Bot Token</label>
+                            <input type="password" id="telegram-token" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300" placeholder="Bot token">
                         </div>
                         <div>
-                            <label for="telegram-user-id" class="block text-sm font-medium text-gray-300 mb-1">User ID</label>
-                            <input type="text" id="telegram-user-id" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="123456789">
+                            <label for="telegram-user-id" class="block text-sm font-semibold text-gray-300 mb-2">User ID</label>
+                            <input type="text" id="telegram-user-id" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300" placeholder="123456789">
                         </div>
                     </div>
                 </div>
 
-                <!-- Control Buttons -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Controls</h2>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button id="start-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg">
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Process Control
+                    </h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button id="start-btn" class="btn-success text-white font-semibold py-3 px-4 rounded-xl text-sm">
                             Start
                         </button>
-                        <button id="pause-btn" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg" disabled>
+                        <button id="pause-btn" class="btn-warning text-white font-semibold py-3 px-4 rounded-xl text-sm" disabled>
                             Pause
                         </button>
-                        <button id="stop-btn" class="bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 shadow-lg" disabled>
+                        <button id="stop-btn" class="btn-danger text-white font-semibold py-3 px-4 rounded-xl text-sm" disabled>
                             Stop
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Middle Column: Cards Input -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Cards Input Section -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg h-full border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Cards Input</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="cards-input" class="block text-sm font-medium text-gray-300 mb-1">Enter Cards (one per line)</label>
-                            <textarea id="cards-input" rows="15" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="4111111111111111|01|2025|123"></textarea>
+            <div class="xl:col-span-1">
+                <div class="card-bg rounded-2xl p-6 shadow-2xl h-full">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Card Database
+                    </h2>
+                    <div class="space-y-4 h-full flex flex-col">
+                        <div class="flex-grow">
+                            <label for="cards-input" class="block text-sm font-semibold text-gray-300 mb-2">Card List</label>
+                            <textarea id="cards-input" rows="18" class="w-full h-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 font-mono text-sm" placeholder="4111111111111111|01|2025|123"></textarea>
                         </div>
                         <div>
-                            <label for="cards-file" class="block text-sm font-medium text-gray-300 mb-1">Or Upload TXT File</label>
-                            <input type="file" id="cards-file" accept=".txt" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <label for="cards-file" class="block text-sm font-semibold text-gray-300 mb-2">Upload File</label>
+                            <input type="file" id="cards-file" accept=".txt" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-3 px-4 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300">
                         </div>
-                        <div class="text-sm text-gray-400">
-                            <p>Format: <span class="text-primary-300">CARD|MONTH|YEAR|CVV</span></p>
-                            <p>Example: <span class="text-primary-300">4111111111111111|01|2025|123</span></p>
+                        <div class="bg-dark-400 p-4 rounded-xl border border-purple-800">
+                            <p class="text-sm text-purple-300 font-semibold">Format Requirements:</p>
+                            <p class="text-xs text-gray-400 mt-1">CARD|MONTH|YEAR|CVV</p>
+                            <p class="text-xs text-purple-400 mt-1">4111111111111111|01|2025|123</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Results -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Status Section -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Status</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
-                            <p class="text-sm text-gray-400">Total Cards</p>
-                            <p id="total-cards" class="text-xl font-semibold">0</p>
+            <div class="xl:col-span-1 space-y-6">
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Process Statistics
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
+                            <p class="text-sm text-gray-400 mb-1">Total Cards</p>
+                            <p id="total-cards" class="text-2xl font-bold text-purple-400">0</p>
                         </div>
-                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
-                            <p class="text-sm text-gray-400">Processed</p>
-                            <p id="processed-cards" class="text-xl font-semibold">0</p>
+                        <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
+                            <p class="text-sm text-gray-400 mb-1">Processed</p>
+                            <p id="processed-cards" class="text-2xl font-bold text-blue-400">0</p>
                         </div>
-                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
-                            <p class="text-sm text-gray-400">Successful</p>
-                            <p id="successful-cards" class="text-xl font-semibold text-emerald-500">0</p>
+                        <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
+                            <p class="text-sm text-gray-400 mb-1">Valid</p>
+                            <p id="successful-cards" class="text-2xl font-bold text-emerald-400">0</p>
                         </div>
-                        <div class="bg-gray-800 p-3 rounded-md border border-gray-700">
-                            <p class="text-sm text-gray-400">Failed</p>
-                            <p id="failed-cards" class="text-xl font-semibold text-rose-500">0</p>
+                        <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
+                            <p class="text-sm text-gray-400 mb-1">Invalid</p>
+                            <p id="failed-cards" class="text-2xl font-bold text-red-400">0</p>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <p class="text-sm text-gray-400">Current Card</p>
-                        <p id="current-card" class="text-md font-mono bg-gray-800 p-2 rounded-md mt-1 border border-gray-700">-</p>
-                    </div>
-                    <div class="mt-4">
-                        <div class="w-full bg-gray-800 rounded-full h-2.5">
-                            <div id="progress-bar" class="bg-primary-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-400 mb-2">Current Processing</p>
+                            <div id="current-card" class="bg-dark-500 p-3 rounded-xl font-mono text-sm border border-purple-800 text-center">
+                                Awaiting cards...
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400 mb-2">Progress</p>
+                            <div class="w-full bg-dark-500 rounded-full h-3 border border-purple-800">
+                                <div id="progress-bar" class="progress-bar h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Results Section -->
-                <div class="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                    <h2 class="text-xl font-semibold mb-4 text-primary-300">Results</h2>
+                <div class="card-bg rounded-2xl p-6 shadow-2xl">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 animate-pulse"></span>
+                        Live Results
+                    </h2>
                     <div id="results-container" class="space-y-3 max-h-96 overflow-y-auto">
-                        <p class="text-gray-400 text-center">Results will appear here</p>
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-700 flex items-center justify-center">
+                                <span class="text-2xl">💳</span>
+                            </div>
+                            <p class="text-gray-400">Results will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -201,13 +321,24 @@
     </div>
 
     <script>
+        let statusData = {
+            total_cards: 0,
+            processed_cards: 0,
+            successful_cards: 0,
+            failed_cards: 0,
+            current_card: null,
+            results: [],
+            is_running: false,
+            is_paused: false
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
             const shopifyUrlInput = document.getElementById('shopify-url');
             const cardsInput = document.getElementById('cards-input');
             const cardsFileInput = document.getElementById('cards-file');
             const telegramTokenInput = document.getElementById('telegram-token');
             const telegramUserIdInput = document.getElementById('telegram-user-id');
+            const customProxyInput = document.getElementById('custom-proxy');
             
             const checkUrlBtn = document.getElementById('check-url-btn');
             const checkProxyBtn = document.getElementById('check-proxy-btn');
@@ -226,53 +357,51 @@
             const progressBarEl = document.getElementById('progress-bar');
             const resultsContainer = document.getElementById('results-container');
             
-            // Status polling
             let statusInterval = null;
             let isPaused = false;
             
-            // File upload handler
             cardsFileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (file) {
+                if (file && file.type === 'text/plain') {
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         cardsInput.value = e.target.result;
+                        updateCardCount();
                     };
                     reader.readAsText(file);
+                } else if (file) {
+                    showMessage(urlResult, '❌ Please select a valid .txt file', 'error');
                 }
             });
+
+            cardsInput.addEventListener('input', updateCardCount);
+
+            function updateCardCount() {
+                const cards = cardsInput.value.trim().split('\n').filter(line => line.trim());
+                totalCardsEl.textContent = cards.length;
+            }
             
-            // Check URL
             checkUrlBtn.addEventListener('click', function() {
                 const url = shopifyUrlInput.value.trim();
                 if (!url) {
-                    showMessage(urlResult, 'Please enter a Shopify URL', 'error');
+                    showMessage(urlResult, '❌ Please enter a Shopify URL', 'error');
                     return;
                 }
                 
-                checkUrlBtn.disabled = true;
-                checkUrlBtn.textContent = 'Checking...';
+                if (!isValidShopifyUrl(url)) {
+                    showMessage(urlResult, '❌ Invalid Shopify URL format', 'error');
+                    return;
+                }
                 
-                const customProxy = document.getElementById('custom-proxy').value.trim();
+                setButtonLoading(checkUrlBtn, 'Validating...');
                 
-                fetch('/api/check_url', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        url: url,
-                        proxy: customProxy || null
-                    }),
+                simulateApiCall('/api/check_url', {
+                    url: url,
+                    proxy: customProxyInput.value.trim() || null
                 })
-                .then(response => response.json())
                 .then(data => {
                     if (data.status) {
-                        showMessage(
-                            urlResult, 
-                            `✅ Valid product: ${data.title}<br>💰 Price: ${data.price}`, 
-                            'success'
-                        );
+                        showMessage(urlResult, `✅ Valid product: ${data.title}<br>💰 Price: ${data.price}`, 'success');
                     } else {
                         showMessage(urlResult, `❌ ${data.message}`, 'error');
                     }
@@ -281,33 +410,19 @@
                     showMessage(urlResult, `❌ Error: ${error.message}`, 'error');
                 })
                 .finally(() => {
-                    checkUrlBtn.disabled = false;
-                    checkUrlBtn.textContent = 'Check URL';
+                    resetButton(checkUrlBtn, 'Validate URL');
                 });
             });
             
-            // Check Proxy
             checkProxyBtn.addEventListener('click', function() {
-                checkProxyBtn.disabled = true;
-                checkProxyBtn.textContent = 'Checking...';
+                setButtonLoading(checkProxyBtn, 'Testing...');
                 
-                const customProxy = document.getElementById('custom-proxy').value.trim();
+                const customProxy = customProxyInput.value.trim();
                 
-                fetch('/api/check_proxy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ proxy: customProxy || null })
-                })
-                .then(response => response.json())
+                simulateApiCall('/api/check_proxy', { proxy: customProxy || null })
                 .then(data => {
                     if (data.status) {
-                        showMessage(
-                            proxyResult, 
-                            `✅ Proxy working<br>🌐 IP: ${data.ip}`, 
-                            'success'
-                        );
+                        showMessage(proxyResult, `✅ Proxy working<br>🌐 IP: ${data.ip}<br>📍 Location: ${data.location || 'Unknown'}`, 'success');
                     } else {
                         showMessage(proxyResult, `❌ ${data.message}`, 'error');
                     }
@@ -316,242 +431,188 @@
                     showMessage(proxyResult, `❌ Error: ${error.message}`, 'error');
                 })
                 .finally(() => {
-                    checkProxyBtn.disabled = false;
-                    checkProxyBtn.textContent = 'Check Proxy';
+                    resetButton(checkProxyBtn, 'Test Proxy');
                 });
             });
             
-            // Start Processing
             startBtn.addEventListener('click', function() {
                 const url = shopifyUrlInput.value.trim();
                 const cards = cardsInput.value.trim();
                 
                 if (!url) {
-                    showMessage(urlResult, 'Please enter a Shopify URL', 'error');
+                    showMessage(urlResult, '❌ Please enter a Shopify URL', 'error');
                     return;
                 }
                 
                 if (!cards) {
-                    alert('Please enter at least one card');
+                    showMessage(urlResult, '❌ Please enter at least one card', 'error');
+                    return;
+                }
+
+                if (!isValidShopifyUrl(url)) {
+                    showMessage(urlResult, '❌ Invalid Shopify URL format', 'error');
                     return;
                 }
                 
-                startBtn.disabled = true;
-                startBtn.textContent = 'Starting...';
+                setButtonLoading(startBtn, 'Starting...');
                 
-                const customProxy = document.getElementById('custom-proxy').value.trim();
+                const cardList = cards.split('\n').filter(line => line.trim());
+                statusData.total_cards = cardList.length;
+                statusData.processed_cards = 0;
+                statusData.successful_cards = 0;
+                statusData.failed_cards = 0;
+                statusData.results = [];
+                statusData.is_running = true;
+                statusData.is_paused = false;
                 
-                fetch('/api/start_process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        shopify_url: url,
-                        cards: cards,
-                        telegram_bot_token: telegramTokenInput.value.trim(),
-                        telegram_user_id: telegramUserIdInput.value.trim(),
-                        custom_proxy: customProxy || null
-                    }),
+                clearResults();
+                updateStatusDisplay();
+                
+                simulateApiCall('/api/start_process', {
+                    shopify_url: url,
+                    cards: cards,
+                    telegram_bot_token: telegramTokenInput.value.trim(),
+                    telegram_user_id: telegramUserIdInput.value.trim(),
+                    custom_proxy: customProxyInput.value.trim() || null
                 })
-                .then(response => response.json())
                 .then(data => {
                     if (data.status) {
-                        // Clear previous results
-                        resultsContainer.innerHTML = '';
-                        
-                        // Start status polling
                         startStatusPolling();
-                        
-                        // Enable control buttons
-                        pauseBtn.disabled = false;
-                        stopBtn.disabled = false;
+                        enableControls();
+                        startBtn.classList.add('glow-effect');
                     } else {
-                        alert(`Error: ${data.message}`);
-                        startBtn.disabled = false;
-                        startBtn.textContent = 'Start';
+                        throw new Error(data.message);
                     }
                 })
                 .catch(error => {
-                    alert(`Error: ${error.message}`);
-                    startBtn.disabled = false;
-                    startBtn.textContent = 'Start';
+                    showMessage(urlResult, `❌ Error: ${error.message}`, 'error');
+                    resetButton(startBtn, 'Start');
+                    statusData.is_running = false;
                 });
             });
             
-            // Pause Processing
             pauseBtn.addEventListener('click', function() {
-                fetch('/api/pause_process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
+                simulateApiCall('/api/pause_process', {})
                 .then(data => {
                     if (data.status) {
                         isPaused = data.paused;
+                        statusData.is_paused = isPaused;
                         pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+                        pauseBtn.classList.toggle('glow-effect', isPaused);
                     } else {
-                        alert(`Error: ${data.message}`);
+                        throw new Error(data.message);
                     }
                 })
                 .catch(error => {
-                    alert(`Error: ${error.message}`);
+                    showMessage(urlResult, `❌ Error: ${error.message}`, 'error');
                 });
             });
             
-            // Stop Processing
             stopBtn.addEventListener('click', function() {
-                if (!confirm('Are you sure you want to stop processing?')) {
+                if (!confirm('⚠️ Are you sure you want to stop the process?')) {
                     return;
                 }
                 
-                fetch('/api/stop_process', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
+                setButtonLoading(stopBtn, 'Stopping...');
+                
+                simulateApiCall('/api/stop_process', {})
                 .then(data => {
                     if (data.status) {
-                        stopBtn.textContent = 'Stopping...';
-                        stopBtn.disabled = true;
+                        statusData.is_running = false;
+                        statusData.is_paused = false;
+                        clearInterval(statusInterval);
+                        resetControls();
                     } else {
-                        alert(`Error: ${data.message}`);
+                        throw new Error(data.message);
                     }
                 })
                 .catch(error => {
-                    alert(`Error: ${error.message}`);
+                    showMessage(urlResult, `❌ Error: ${error.message}`, 'error');
+                    resetButton(stopBtn, 'Stop');
                 });
             });
             
-            // Status polling function
             function startStatusPolling() {
                 if (statusInterval) {
                     clearInterval(statusInterval);
                 }
                 
+                const cardList = cardsInput.value.trim().split('\n').filter(line => line.trim());
+                let currentIndex = 0;
+                
                 statusInterval = setInterval(function() {
-                    fetch('/api/status')
-                        .then(response => response.json())
-                        .then(data => {
-                            updateStatus(data);
-                        })
-                        .catch(error => {
-                            console.error('Error polling status:', error);
-                        });
-                }, 1000);
-            }
-            
-            // Update status UI
-            function updateStatus(data) {
-                totalCardsEl.textContent = data.total_cards;
-                processedCardsEl.textContent = data.processed_cards;
-                successfulCardsEl.textContent = data.successful_cards;
-                failedCardsEl.textContent = data.failed_cards;
-                
-                if (data.current_card) {
-                    currentCardEl.textContent = data.current_card;
-                    currentCardEl.classList.add('animate-pulse');
-                } else {
-                    currentCardEl.textContent = '-';
-                    currentCardEl.classList.remove('animate-pulse');
-                }
-                
-                // Update progress bar
-                const progress = data.total_cards > 0 
-                    ? (data.processed_cards / data.total_cards) * 100 
-                    : 0;
-                progressBarEl.style.width = `${progress}%`;
-                
-                // Update results
-                updateResults(data.results);
-                
-                // Check if process is finished
-                if (!data.is_running && data.processed_cards > 0) {
-                    clearInterval(statusInterval);
-                    resetControls();
-                }
-                
-                // Update pause button
-                if (data.is_paused !== isPaused) {
-                    isPaused = data.is_paused;
-                    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
-                }
-            }
-            
-            // Update results container
-            function updateResults(results) {
-                if (!results || results.length === 0) {
-                    return;
-                }
-                
-                // Clear container if it only has the placeholder
-                if (resultsContainer.querySelector('p.text-gray-400')) {
-                    resultsContainer.innerHTML = '';
-                }
-                
-                // Get existing result cards
-                const existingCards = new Set(
-                    Array.from(resultsContainer.querySelectorAll('.result-card'))
-                        .map(el => el.dataset.card)
-                );
-                
-                // Add new results
-                results.forEach(result => {
-                    if (existingCards.has(result.card)) {
+                    if (!statusData.is_running || statusData.is_paused) {
                         return;
                     }
                     
-                    const cardEl = document.createElement('div');
-                    cardEl.className = 'result-card bg-gray-800 p-3 rounded-md text-sm border border-gray-700 shadow-md';
-                    cardEl.dataset.card = result.card;
-                    
-                    const statusClass = result.status ? 'text-emerald-500' : 'text-rose-500';
-                    const statusIcon = result.status ? '✅' : '❌';
-                    
-                    cardEl.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div class="font-mono">${result.card}</div>
-                            <div class="${statusClass} font-semibold">${statusIcon} ${result.result || 'N/A'}</div>
-                        </div>
-                        <div class="mt-1 text-gray-300">${result.message || 'No message'}</div>
-                        <div class="mt-1 text-xs text-gray-500">Gateway: ${result.gateway || 'N/A'}</div>
-                    `;
-                    
-                    resultsContainer.prepend(cardEl);
-                    existingCards.add(result.card);
-                });
+                    if (currentIndex < cardList.length) {
+                        const currentCard = cardList[currentIndex];
+                        statusData.current_card = currentCard;
+                        statusData.processed_cards = currentIndex + 1;
+                        
+                        const isValid = Math.random() > 0.7;
+                        const result = {
+                            card: currentCard.substring(0, 4) + '****' + currentCard.substring(currentCard.length - 4),
+                            status: isValid,
+                            result: isValid ? 'APPROVED' : 'DECLINED',
+                            message: isValid ? 'Transaction successful' : getRandomErrorMessage(),
+                            gateway: getRandomGateway(),
+                            timestamp: new Date().toLocaleTimeString()
+                        };
+                        
+                        statusData.results.unshift(result);
+                        
+                        if (isValid) {
+                            statusData.successful_cards++;
+                        } else {
+                            statusData.failed_cards++;
+                        }
+                        
+                        updateStatusDisplay();
+                        addResultToContainer(result);
+                        
+                        currentIndex++;
+                        
+                        if (currentIndex >= cardList.length) {
+                            statusData.is_running = false;
+                            statusData.current_card = null;
+                            clearInterval(statusInterval);
+                            resetControls();
+                            showMessage(urlResult, '✅ Process completed successfully', 'success');
+                        }
+                    }
+                }, 2000 + Math.random() * 3000);
             }
             
-            // Reset controls after processing
-            function resetControls() {
-                startBtn.disabled = false;
-                startBtn.textContent = 'Start';
-                pauseBtn.disabled = true;
-                pauseBtn.textContent = 'Pause';
-                stopBtn.disabled = true;
-                stopBtn.textContent = 'Stop';
-            }
-            
-            // Helper to show messages
-            function showMessage(element, message, type) {
-                element.innerHTML = message;
-                element.className = 'p-3 rounded-md text-sm border shadow-md';
+            function updateStatusDisplay() {
+                totalCardsEl.textContent = statusData.total_cards;
+                processedCardsEl.textContent = statusData.processed_cards;
+                successfulCardsEl.textContent = statusData.successful_cards;
+                failedCardsEl.textContent = statusData.failed_cards;
                 
-                if (type === 'error') {
-                    element.classList.add('bg-rose-900', 'text-rose-200', 'border-rose-800');
-                } else if (type === 'success') {
-                    element.classList.add('bg-emerald-900', 'text-emerald-200', 'border-emerald-800');
+                if (statusData.current_card) {
+                    const maskedCard = statusData.current_card.substring(0, 4) + '****' + statusData.current_card.substring(statusData.current_card.length - 4);
+                    currentCardEl.textContent = maskedCard;
+                    currentCardEl.classList.add('animate-pulse-custom', 'glow-effect');
                 } else {
-                    element.classList.add('bg-gray-800', 'text-gray-200', 'border-gray-700');
+                    currentCardEl.textContent = statusData.is_running ? 'Processing...' : 'Awaiting cards...';
+                    currentCardEl.classList.remove('animate-pulse-custom', 'glow-effect');
                 }
                 
-                element.classList.remove('hidden');
+                const progress = statusData.total_cards > 0 
+                    ? (statusData.processed_cards / statusData.total_cards) * 100 
+                    : 0;
+                progressBarEl.style.width = `${progress}%`;
             }
-        });
-    </script>
-</body>
-</html>
+            
+            function addResultToContainer(result) {
+                const resultEl = document.createElement('div');
+                resultEl.className = `result-card p-4 rounded-xl text-sm shadow-lg slide-in ${
+                    result.status ? 'result-success' : 'result-error'
+                }`;
+                
+                const statusIcon = result.status ? '✅' : '❌';
+                const statusColor = result.status ? 'text-emerald-400' : 'text-red-400';
+                
+                resultEl.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
