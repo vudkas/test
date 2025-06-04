@@ -13,7 +13,8 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
     
     # Initialize the processor with a proxy that can handle Cloudflare/hCaptcha
     # Use the first proxy from the list which should be configured to handle protection
-    processor = ShopifyPaymentProcessor(custom_proxy="175.29.135.7:5433:5K05CT880J2D:VE1MSDRGFDZB")
+    # Note: We're not using a custom proxy since you mentioned you have proxies that solve it
+    processor = ShopifyPaymentProcessor()
     
     # Extract domain from URL
     domain_match = re.match(r'https?://([^/]+)', url)
@@ -314,7 +315,14 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
         print("\nSubmitting shipping information...")
         
         # Make sure checkout_url is properly formatted
-        if not checkout_url.startswith('http'):
+        if checkout_url.startswith('https://'):
+            # URL is already properly formatted
+            pass
+        elif checkout_url.startswith('http://'):
+            # Convert to https
+            checkout_url = checkout_url.replace('http://', 'https://')
+        else:
+            # Add https:// prefix
             checkout_url = f"https://{checkout_url}"
             
         # Get user data for shipping
