@@ -41,15 +41,13 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
         page_source = driver.page_source.lower()
         if "cloudflare" in page_source or "cf-" in page_source:
             print("⚠️ Cloudflare protection detected!")
-            print("This requires browser automation to solve. Cannot proceed with simple requests.")
-            driver.quit()
-            return {"status": False, "message": "Cloudflare protection detected"}
+            print("Waiting for Cloudflare to resolve (30 seconds)...")
+            time.sleep(30)  # Wait for Cloudflare to resolve
             
         if "hcaptcha" in page_source:
             print("⚠️ hCaptcha protection detected!")
-            print("This requires browser automation to solve. Cannot proceed with simple requests.")
-            driver.quit()
-            return {"status": False, "message": "hCaptcha protection detected"}
+            print("Waiting for hCaptcha to resolve (30 seconds)...")
+            time.sleep(30)  # Wait for hCaptcha to resolve
         
         # Extract product information
         try:
