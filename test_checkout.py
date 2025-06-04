@@ -328,7 +328,7 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
         
         # Prepare shipping data
         shipping_data = {
-            "checkout[email]": user_data.get("email", "test@example.com"),
+            "checkout[email]": user_data.get("email", "raven.usu@gmail.com"),
             "checkout[shipping_address][first_name]": user_data.get("first_name", "John"),
             "checkout[shipping_address][last_name]": user_data.get("last_name", "Doe"),
             "checkout[shipping_address][address1]": user_data.get("address1", "123 Test St"),

@@ -95,7 +95,7 @@ class ShopifyPaymentProcessor:
     def get_user_data(self, nat="US"):
         if nat == "AU":
             return {
-                'email': f"test{random.randint(1000, 9999)}@example.com",
+                'email': "raven.usu@gmail.com",
                 'first_name': "John",
                 'last_name': "Smith",
                 'city': "Hambidge",
@@ -106,7 +106,7 @@ class ShopifyPaymentProcessor:
             }
         else:
             return {
-                'email': f"test{random.randint(1000, 9999)}@example.com",
+                'email': "raven.usu@gmail.com",
                 'first_name': "John",
                 'last_name': "Doe",
                 'city': "New York",
@@ -294,6 +294,32 @@ class ShopifyPaymentProcessor:
                 # If we can't find the token, generate a random one as fallback
                 auth_token = self.generate_random_string(86)
             
+            # Check if we need to submit email first (some stores have a separate step)
+            if 'checkout[email]' in checkout_response.text and 'shipping_address' not in checkout_response.text:
+                # Submit email first
+                email_data = {
+                    '_method': 'patch',
+                    'authenticity_token': auth_token,
+                    'previous_step': '',
+                    'step': 'contact_information',
+                    'checkout[email]': user_data['email'],
+                    'checkout[buyer_accepts_marketing]': '0',
+                    'checkout[client_details][browser_width]': '1920',
+                    'checkout[client_details][browser_height]': '1080',
+                    'checkout[client_details][javascript_enabled]': '1'
+                }
+                
+                print(f"Submitting email: {user_data['email']}")
+                email_response = self.session.post(checkout_page_url, data=email_data)
+                
+                # Get the updated page with shipping address form
+                checkout_response = self.session.get(checkout_page_url)
+                
+                # Re-extract authenticity token
+                auth_token_match = re.search(r'name="authenticity_token" value="([^"]+)"', checkout_response.text)
+                if auth_token_match:
+                    auth_token = auth_token_match.group(1)
+            
             # Prepare shipping data
             shipping_data = {
                 '_method': 'patch',
@@ -313,11 +339,15 @@ class ShopifyPaymentProcessor:
             
             # Some Shopify stores require additional fields
             shipping_data['checkout[remember_me]'] = '0'
+            shipping_data['checkout[buyer_accepts_marketing]'] = '0'
             shipping_data['checkout[client_details][browser_width]'] = '1920'
             shipping_data['checkout[client_details][browser_height]'] = '1080'
             shipping_data['checkout[client_details][javascript_enabled]'] = '1'
+            shipping_data['checkout[shipping_address][company]'] = ''
+            shipping_data['checkout[shipping_address][address2]'] = ''
             
             # Submit shipping information
+            print(f"Submitting shipping information for {user_data['first_name']} {user_data['last_name']}")
             response = self.session.post(checkout_page_url, data=shipping_data)
             
             # Check if we need to select a shipping method
@@ -328,6 +358,20 @@ class ShopifyPaymentProcessor:
                 if shipping_method_match:
                     shipping_method = shipping_method_match.group(1)
                 
+                # If we couldn't find a shipping method, try alternative patterns
+                if not shipping_method:
+                    alt_patterns = [
+                        r'id="checkout_shipping_rate_id_([^"]+)"',
+                        r'value="([^"]+)" class="radio-input".*?shipping-method',
+                        r'data-checkout-total-shipping="[^"]+" data-checkout-shipping-rate-id="([^"]+)"'
+                    ]
+                    
+                    for pattern in alt_patterns:
+                        match = re.search(pattern, response.text)
+                        if match:
+                            shipping_method = match.group(1)
+                            break
+                
                 if shipping_method:
                     # Submit shipping method selection
                     shipping_method_data = {
@@ -335,10 +379,35 @@ class ShopifyPaymentProcessor:
                         'authenticity_token': auth_token,
                         'previous_step': 'shipping_method',
                         'step': 'payment_method',
-                        'checkout[shipping_rate][id]': urllib.parse.unquote(shipping_method)
+                        'checkout[shipping_rate][id]': urllib.parse.unquote(shipping_method),
+                        'checkout[email]': user_data['email'],  # Include email again to ensure it's set
+                        'checkout[client_details][browser_width]': '1920',
+                        'checkout[client_details][browser_height]': '1080',
+                        'checkout[client_details][javascript_enabled]': '1'
                     }
                     
+                    print(f"Selecting shipping method: {shipping_method}")
                     shipping_method_response = self.session.post(checkout_page_url, data=shipping_method_data)
+                    
+                    # Check if we need to submit billing address
+                    if 'billing_address' in shipping_method_response.text and 'different_billing_address' in shipping_method_response.text:
+                        # Use same billing address as shipping
+                        billing_data = {
+                            '_method': 'patch',
+                            'authenticity_token': auth_token,
+                            'previous_step': 'shipping_method',
+                            'step': 'payment_method',
+                            'checkout[different_billing_address]': 'false',
+                            'checkout[email]': user_data['email'],
+                            'checkout[client_details][browser_width]': '1920',
+                            'checkout[client_details][browser_height]': '1080',
+                            'checkout[client_details][javascript_enabled]': '1'
+                        }
+                        
+                        print("Setting billing address same as shipping")
+                        billing_response = self.session.post(checkout_page_url, data=billing_data)
+                        return {'success': billing_response.status_code == 200}
+                    
                     return {'success': shipping_method_response.status_code == 200}
             
             return {'success': response.status_code == 200}
@@ -396,9 +465,19 @@ class ShopifyPaymentProcessor:
             
             # If we still don't have a payment gateway, try to find it in other ways
             if not payment_gateway:
-                gateway_match = re.search(r'data-gateway-name="([^"]+)"', payment_page_response.text)
-                if gateway_match:
-                    payment_gateway = gateway_match.group(1)
+                gateway_patterns = [
+                    r'data-gateway-name="([^"]+)"',
+                    r'data-gateway="([^"]+)"',
+                    r'data-payment-gateway="([^"]+)"',
+                    r'name="checkout\[payment_gateway\]" value="([^"]+)"',
+                    r'gateway:\s*[\'"]([^\'"]+)[\'"]'
+                ]
+                
+                for pattern in gateway_patterns:
+                    gateway_match = re.search(pattern, payment_page_response.text)
+                    if gateway_match:
+                        payment_gateway = gateway_match.group(1)
+                        break
             
             # If we still don't have a payment gateway, use a default value
             if not payment_gateway:
@@ -408,6 +487,33 @@ class ShopifyPaymentProcessor:
             sub_month = self.format_month(month)
             if len(year) <= 2:
                 year = f"20{year}"
+            
+            # Extract cart session and cookies
+            cart_session = None
+            cart_token = None
+            checkout_token = None
+            
+            # Extract cart token from cookies
+            for cookie in self.session.cookies:
+                if cookie.name == 'cart':
+                    cart_token = cookie.value
+                    break
+            
+            # Extract checkout token from URL
+            checkout_token_match = re.search(r'/checkouts/([^/?]+)', checkout_page_url)
+            if checkout_token_match:
+                checkout_token = checkout_token_match.group(1)
+            
+            # Extract cart session from page
+            cart_session_match = re.search(r'cart_session_id:\s*[\'"]([^\'"]+)[\'"]', payment_page_response.text)
+            if cart_session_match:
+                cart_session = cart_session_match.group(1)
+            
+            # Extract location path
+            location_path = None
+            location_match = re.search(r'location:\s*[\'"]([^\'"]+)[\'"]', payment_page_response.text)
+            if location_match:
+                location_path = location_match.group(1)
             
             # Prepare card session data
             card_session_data = {
@@ -426,7 +532,9 @@ class ShopifyPaymentProcessor:
                 "https://deposit.us.shopifycs.com/sessions",
                 "https://elb.deposit.shopifycs.com/sessions",
                 "https://checkout.shopifycs.com/sessions",
-                f"https://{domain}/wallets/checkouts/{checkout_url.split('/')[-1]}/payment_sessions"
+                f"https://{domain}/wallets/checkouts/{checkout_url.split('/')[-1]}/payment_sessions",
+                "https://deposit.global.shopifycs.com/sessions",
+                "https://deposit.eu.shopifycs.com/sessions"
             ]
             
             session_id = None
@@ -435,7 +543,12 @@ class ShopifyPaymentProcessor:
                     session_response = self.session.post(
                         endpoint,
                         json=card_session_data,
-                        headers={'Content-Type': 'application/json'}
+                        headers={
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Shopify-Checkout-Version': '2022-03',
+                            'X-Shopify-Checkout-API-Call': 'true'
+                        }
                     )
                     
                     if session_response.status_code == 200:
@@ -443,6 +556,7 @@ class ShopifyPaymentProcessor:
                             session_data = session_response.json()
                             if 'id' in session_data:
                                 session_id = session_data['id']
+                                print(f"Got session ID from {endpoint}: {session_id}")
                                 break
                         except:
                             pass
@@ -451,6 +565,7 @@ class ShopifyPaymentProcessor:
                         id_match = re.search(r'"id"\s*:\s*"([^"]+)"', session_response.text)
                         if id_match:
                             session_id = id_match.group(1)
+                            print(f"Extracted session ID from response text: {session_id}")
                             break
                 except Exception as e:
                     print(f"Error with payment endpoint {endpoint}: {str(e)}")
@@ -465,14 +580,24 @@ class ShopifyPaymentProcessor:
                     if payment_form_url.startswith('/'):
                         payment_form_url = f"https://{domain}{payment_form_url}"
                     
+                    print(f"Using direct payment form: {payment_form_url}")
+                    
                     # Submit card details directly to the payment form
                     direct_payment_data = {
                         'credit_card[name]': f"{user_data['first_name']} {user_data['last_name']}",
                         'credit_card[number]': cc,
                         'credit_card[month]': sub_month,
                         'credit_card[year]': year,
-                        'credit_card[verification_value]': cvv
+                        'credit_card[verification_value]': cvv,
+                        'authenticity_token': auth_token
                     }
+                    
+                    # Add additional fields that might be required
+                    if cart_token:
+                        direct_payment_data['cart'] = cart_token
+                    
+                    if checkout_token:
+                        direct_payment_data['checkout_token'] = checkout_token
                     
                     direct_payment_response = self.session.post(payment_form_url, data=direct_payment_data)
                     
@@ -482,7 +607,10 @@ class ShopifyPaymentProcessor:
                             'status': True,
                             'result': 'Approved - Charged',
                             'message': 'Payment successful',
-                            'gateway': self.determine_gateway_type(None, checkout_url)
+                            'gateway': self.determine_gateway_type(None, checkout_url),
+                            'cart_session': cart_session,
+                            'checkout_token': checkout_token,
+                            'location_path': location_path
                         }
                     
                     # If not successful, try to parse the error message
@@ -492,7 +620,11 @@ class ShopifyPaymentProcessor:
                         error_message = error_match.group(1).strip()
                         error_message = re.sub(r'<[^>]*>', '', error_message)  # Remove HTML tags
                     
-                    return self.parse_payment_result(direct_payment_response.text, checkout_url, error_message)
+                    result = self.parse_payment_result(direct_payment_response.text, checkout_url, error_message)
+                    result['cart_session'] = cart_session
+                    result['checkout_token'] = checkout_token
+                    result['location_path'] = location_path
+                    return result
             
             # If we have a session ID, proceed with the standard payment flow
             if session_id:
@@ -510,6 +642,10 @@ class ShopifyPaymentProcessor:
                     'complete': '1'
                 }
                 
+                # Add email to ensure it's set correctly
+                payment_data['checkout[email]'] = user_data['email']
+                
+                print(f"Submitting payment with session ID: {session_id}")
                 payment_response = self.session.post(checkout_page_url, data=payment_data)
                 
                 # Wait for payment processing
@@ -521,16 +657,31 @@ class ShopifyPaymentProcessor:
                         'status': True,
                         'result': 'Approved - Charged',
                         'message': 'Payment successful',
-                        'gateway': self.determine_gateway_type(None, checkout_url)
+                        'gateway': self.determine_gateway_type(None, checkout_url),
+                        'cart_session': cart_session,
+                        'checkout_token': checkout_token,
+                        'location_path': location_path
                     }
                 
                 # If not, check the processing page
                 validation_response = self.session.get(f"{checkout_page_url}?from_processing_page=1&validate=true")
                 
-                return self.parse_payment_result(validation_response.text, checkout_url)
+                result = self.parse_payment_result(validation_response.text, checkout_url)
+                result['cart_session'] = cart_session
+                result['checkout_token'] = checkout_token
+                result['location_path'] = location_path
+                return result
             
             # If we reach here, we couldn't process the payment
-            return {'status': False, 'message': 'Failed to process payment', 'result': 'Error', 'gateway': 'Unknown'}
+            return {
+                'status': False, 
+                'message': 'Failed to process payment', 
+                'result': 'Error', 
+                'gateway': 'Unknown',
+                'cart_session': cart_session,
+                'checkout_token': checkout_token,
+                'location_path': location_path
+            }
             
         except Exception as e:
             print(f"Error processing card payment: {str(e)}")
@@ -549,7 +700,11 @@ class ShopifyPaymentProcessor:
                 ('<div class="error">', '</div>'),
                 ('<div class="alert alert-danger">', '</div>'),
                 ('<span class="error-message">', '</span>'),
-                ('data-error-message="', '"')
+                ('data-error-message="', '"'),
+                ('<div class="payment-errors">', '</div>'),
+                ('<div class="message">', '</div>'),
+                ('<div class="banner banner--error">', '</div>'),
+                ('<p class="error-message">', '</p>')
             ]
             
             for pattern in message_patterns:
@@ -560,15 +715,56 @@ class ShopifyPaymentProcessor:
                     message = re.sub(r'<[^>]*>', '', message)
                     message = message.strip()
                     break
+                    
+            # If still no message, try regex patterns
+            if not message:
+                regex_patterns = [
+                    r'<div[^>]*class="[^"]*error[^"]*"[^>]*>(.*?)</div>',
+                    r'<p[^>]*class="[^"]*error[^"]*"[^>]*>(.*?)</p>',
+                    r'data-error-message="([^"]*)"',
+                    r'error_message\s*:\s*[\'"]([^\'"]*)[\'"]'
+                ]
+                
+                for pattern in regex_patterns:
+                    match = re.search(pattern, response_text, re.DOTALL)
+                    if match:
+                        message = match.group(1).strip()
+                        # Remove HTML tags
+                        message = re.sub(r'<[^>]*>', '', message)
+                        message = message.strip()
+                        break
         
         # Determine the gateway type
         gateway_type = self.determine_gateway_type(message, checkout_url)
         
+        # Extract amount if available
+        amount = None
+        amount_patterns = [
+            r'total\s*:\s*[\'"]?\$?(\d+\.\d+)[\'"]?',
+            r'amount[\'"]?\s*:\s*[\'"]?\$?(\d+\.\d+)[\'"]?',
+            r'data-checkout-total-price="(\d+)"',
+            r'data-checkout-payment-due="(\d+)"'
+        ]
+        
+        for pattern in amount_patterns:
+            match = re.search(pattern, response_text)
+            if match:
+                try:
+                    amount_value = match.group(1)
+                    # If it's in cents (large number), convert to dollars
+                    if len(amount_value) > 5 or (amount_value.isdigit() and int(amount_value) > 1000):
+                        amount = f"${float(amount_value)/100:.2f}"
+                    else:
+                        amount = f"${float(amount_value):.2f}"
+                    break
+                except:
+                    pass
+        
         # Check for successful payment
-        if 'thank_you' in response_text or '/thank_you' in response_text:
+        if 'thank_you' in response_text or '/thank_you' in response_text or 'order-status' in response_text:
             return {
                 'status': True,
-                'result': 'Approved - Charged',
+                'result': f'Approved - Charged {amount if amount else ""}',
                 'message': 'Payment successful',
                 'gateway': gateway_type
             }
@@ -597,11 +793,20 @@ class ShopifyPaymentProcessor:
             }
         
         # Check for 3D Secure or additional verification
-        if '3d secure' in response_text.lower() or 'verification' in response_text.lower():
+        if '3d secure' in response_text.lower() or 'verification' in response_text.lower() or 'authenticate' in response_text.lower():
             return {
                 'status': True,
                 'result': 'Approved - 3D Secure',
                 'message': 'Card requires 3D Secure verification',
+                'gateway': gateway_type
+            }
+            
+        # Check for redirect to external payment processor
+        if 'redirect' in response_text.lower() and ('payment' in response_text.lower() or 'processor' in response_text.lower()):
+            return {
+                'status': True,
+                'result': 'Approved - External Redirect',
+                'message': 'Card redirected to external payment processor',
                 'gateway': gateway_type
             }
         
@@ -642,16 +847,24 @@ class ShopifyPaymentProcessor:
         return "Shopify"
 
     def is_cvv_error(self, message):
-        cvv_errors = ["CVV does not match", "CVC Declined", "CVV2 Mismatch", "Security codes does not match"]
-        return any(error in message for error in cvv_errors) if message else False
+        cvv_errors = [
+            "CVV does not match", "CVC Declined", "CVV2 Mismatch", "Security codes does not match",
+            "security code", "cvv", "cvc", "card verification", "card security code", 
+            "verification value", "security number", "card verification failed"
+        ]
+        return any(error.lower() in message.lower() for error in cvv_errors) if message else False
 
     def is_avs_error(self, message):
-        avs_errors = ["AVS", "Address not Verified", "avs"]
-        return any(error in message for error in avs_errors) if message else False
+        avs_errors = [
+            "AVS", "Address not Verified", "avs", "address verification", 
+            "billing address", "address does not match", "address mismatch",
+            "postal code", "zip code", "address verification failed"
+        ]
+        return any(error.lower() in message.lower() for error in avs_errors) if message else False
 
     def is_insufficient_funds(self, message):
-        fund_errors = ["Insufficient Funds", "Insuff Funds", "Credit Floor"]
-        return any(error in message for error in fund_errors) if message else False
+        fund_errors = ["Insufficient Funds", "Insuff Funds", "Credit Floor", "insufficient balance", "not enough funds", "declined due to insufficient funds"]
+        return any(error.lower() in message.lower() for error in fund_errors) if message else False
 
 def process_shopify_payment(cc, month, year, cvv, site_url):
     processor = ShopifyPaymentProcessor()

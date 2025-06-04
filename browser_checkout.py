@@ -141,7 +141,7 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
             email_field = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input#checkout_email, input[name='checkout[email]']"))
             )
-            email_field.send_keys(f"test{int(time.time())}@example.com")
+            email_field.send_keys("raven.usu@gmail.com")
             
             # Fill shipping address
             try:

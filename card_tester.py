@@ -47,7 +47,7 @@ TEST_SITES = [
 
 # Customer information
 CUSTOMER_INFO = {
-    "email": "test@example.com",
+    "email": "raven.usu@gmail.com",
     "first_name": "Test",
     "last_name": "User",
     "address": "123 Test St",
