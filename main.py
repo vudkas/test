@@ -276,7 +276,13 @@ class ShopifyPaymentProcessor:
     def submit_shipping_info(self, checkout_url, user_data):
         try:
             # First, get the checkout page to extract the authenticity token
-            checkout_page_url = f"https://{checkout_url}"
+            # Make sure checkout_url is properly formatted
+            if checkout_url.startswith('https://') or checkout_url.startswith('http://'):
+                checkout_page_url = checkout_url
+            else:
+                checkout_page_url = f"https://{checkout_url}"
+                
+            print(f"Getting checkout page: {checkout_page_url}")
             checkout_response = self.session.get(checkout_page_url)
             
             # Extract authenticity token from the page
@@ -342,7 +348,14 @@ class ShopifyPaymentProcessor:
 
     def get_shipping_rates(self, checkout_url):
         time.sleep(5)
-        response = self.session.get(f"https://{checkout_url}/shipping_rates?step=shipping_method")
+        # Make sure checkout_url is properly formatted
+        if checkout_url.startswith('https://') or checkout_url.startswith('http://'):
+            shipping_rates_url = f"{checkout_url}/shipping_rates?step=shipping_method"
+        else:
+            shipping_rates_url = f"https://{checkout_url}/shipping_rates?step=shipping_method"
+            
+        print(f"Getting shipping rates from: {shipping_rates_url}")
+        response = self.session.get(shipping_rates_url)
         
         shipping_method = self.extract_between(response.text, 'data-shipping-method="', '"')
         payment_gateway = self.extract_between(response.text, '[data-select-gateway=', ']')

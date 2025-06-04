@@ -355,7 +355,12 @@ def test_shopify_checkout(url, cc=None, month=None, year=None, cvv=None):
         if not shipping_result.get('success'):
             print("Trying direct shipping information submission...")
             try:
-                shipping_response = processor.session.post(checkout_url, data=shipping_data, allow_redirects=True)
+                # Make sure the URL is properly formatted for the request
+                shipping_url = checkout_url
+                if not shipping_url.startswith('http'):
+                    shipping_url = f"https://{shipping_url}"
+                print(f"Submitting shipping data to: {shipping_url}")
+                shipping_response = processor.session.post(shipping_url, data=shipping_data, allow_redirects=True)
                 
                 if shipping_response.status_code == 200:
                     shipping_result = {'success': True, 'next_url': shipping_response.url}
