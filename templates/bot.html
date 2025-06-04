@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Checkout Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .result-card {
+            display: none;
+        }
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+        }
+        .checkout-status {
+            font-weight: bold;
+        }
+        .status-running {
+            color: #0d6efd;
+        }
+        .status-completed {
+            color: #198754;
+        }
+        .status-failed {
+            color: #dc3545;
+        }
+        .logo {
+            max-width: 100px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="text-center mb-4">
+                    <h1 class="display-5">🛒 Shopify Checkout Bot</h1>
+                    <p class="lead">Automated checkout for Shopify stores</p>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Checkout Configuration</div>
+                    <div class="card-body">
+                        <form id="checkoutForm">
+                            <div class="mb-3">
+                                <label for="productUrl" class="form-label">Product URL</label>
+                                <input type="url" class="form-control" id="productUrl" placeholder="https://example.myshopify.com/products/example-product" required>
+                                <div class="form-text">Enter the full URL of the product page</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="proxy" class="form-label">Proxy (Optional)</label>
+                                <input type="text" class="form-control" id="proxy" placeholder="ip:port or ip:port:user:pass">
+                                <div class="form-text">Enter proxy in format ip:port or ip:port:user:pass</div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-header">Payment Details (Optional)</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="cc" class="form-label">Credit Card Number</label>
+                                        <input type="text" class="form-control" id="cc" placeholder="4242424242424242">
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="month" class="form-label">Month</label>
+                                            <input type="text" class="form-control" id="month" placeholder="MM">
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="year" class="form-label">Year</label>
+                                            <input type="text" class="form-control" id="year" placeholder="YY">
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="cvv" class="form-label">CVV</label>
+                                            <input type="text" class="form-control" id="cvv" placeholder="123">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-text">If you don't provide payment details, the bot will stop after adding to cart and getting the checkout URL</div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary" id="startButton">Start Checkout</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card result-card" id="resultCard">
+                    <div class="card-header">Checkout Status</div>
+                    <div class="card-body">
+                        <div class="checkout-status mb-3">
+                            <span class="status-running" id="statusRunning">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Running checkout process...
+                            </span>
+                            <span class="status-completed" id="statusCompleted" style="display: none;"></span>
+                        </div>
+                        
+                        <div id="resultDetails"></div>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-danger" id="cancelButton">Cancel</button>
+                            <button class="btn btn-secondary" id="newCheckoutButton" style="display: none;">New Checkout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let checkoutId = null;
+        let statusInterval = null;
+        
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            startCheckout();
+        });
+        
+        document.getElementById('cancelButton').addEventListener('click', function() {
+            cancelCheckout();
+        });
+        
+        document.getElementById('newCheckoutButton').addEventListener('click', function() {
+            resetForm();
+        });
+        
+        function startCheckout() {
+            const productUrl = document.getElementById('productUrl').value;
+            const proxy = document.getElementById('proxy').value;
+            const cc = document.getElementById('cc').value;
+            const month = document.getElementById('month').value;
+            const year = document.getElementById('year').value;
+            const cvv = document.getElementById('cvv').value;
+            
+            // Validate payment details
+            if ((cc || month || year || cvv) && !(cc && month && year && cvv)) {
+                alert('If providing payment details, all fields (cc, month, year, cvv) are required');
+                return;
+            }
+            
+            // Prepare data
+            const data = {
+                url: productUrl,
+                proxy: proxy || null
+            };
+            
+            // Add payment details if provided
+            if (cc && month && year && cvv) {
+                data.cc = cc;
+                data.month = month;
+                data.year = year;
+                data.cvv = cvv;
+            }
+            
+            // Show result card
+            document.getElementById('resultCard').style.display = 'block';
+            document.getElementById('statusRunning').style.display = 'inline';
+            document.getElementById('statusCompleted').style.display = 'none';
+            document.getElementById('resultDetails').innerHTML = '';
+            document.getElementById('cancelButton').style.display = 'block';
+            document.getElementById('newCheckoutButton').style.display = 'none';
+            
+            // Disable form
+            document.getElementById('checkoutForm').querySelectorAll('input, button').forEach(el => {
+                el.disabled = true;
+            });
+            
+            // Send request
+            fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                checkoutId = data.checkout_id;
+                
+                // Start polling for status
+                statusInterval = setInterval(checkStatus, 1000);
+            })
+            .catch(error => {
+                showError('Error starting checkout: ' + error.message);
+            });
+        }
+        
+        function checkStatus() {
+            if (!checkoutId) return;
+            
+            fetch(`/api/status/${checkoutId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                if (data.status === 'completed') {
+                    clearInterval(statusInterval);
+                    showResult(data.result);
+                }
+            })
+            .catch(error => {
+                showError('Error checking status: ' + error.message);
+            });
+        }
+        
+        function cancelCheckout() {
+            if (!checkoutId) return;
+            
+            fetch(`/api/cancel/${checkoutId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(statusInterval);
+                document.getElementById('statusRunning').style.display = 'none';
+                document.getElementById('statusCompleted').style.display = 'inline';
+                document.getElementById('statusCompleted').textContent = 'Checkout cancelled';
+                document.getElementById('statusCompleted').className = 'status-failed';
+                document.getElementById('cancelButton').style.display = 'none';
+                document.getElementById('newCheckoutButton').style.display = 'block';
+            })
+            .catch(error => {
+                showError('Error cancelling checkout: ' + error.message);
+            });
+        }
+        
+        function showResult(result) {
+            document.getElementById('statusRunning').style.display = 'none';
+            document.getElementById('statusCompleted').style.display = 'inline';
+            document.getElementById('cancelButton').style.display = 'none';
+            document.getElementById('newCheckoutButton').style.display = 'block';
+            
+            let resultHtml = '';
+            
+            if (result.status) {
+                if (result.checkout_url) {
+                    document.getElementById('statusCompleted').textContent = '✅ Successfully added to cart';
+                    document.getElementById('statusCompleted').className = 'status-completed';
+                    
+                    resultHtml += `<div class="alert alert-success">Successfully added to cart and obtained checkout URL.</div>`;
+                    
+                    if (result.product) {
+                        resultHtml += `<p><strong>Product:</strong> ${result.product}</p>`;
+                    }
+                    
+                    if (result.variant) {
+                        resultHtml += `<p><strong>Variant:</strong> ${result.variant}</p>`;
+                    }
+                    
+                    if (result.price) {
+                        resultHtml += `<p><strong>Price:</strong> ${result.price}</p>`;
+                    }
+                    
+                    resultHtml += `<p><strong>Checkout URL:</strong> <a href="${result.checkout_url}" target="_blank">${result.checkout_url}</a></p>`;
+                } else {
+                    document.getElementById('statusCompleted').textContent = '✅ Checkout completed successfully';
+                    document.getElementById('statusCompleted').className = 'status-completed';
+                    
+                    resultHtml += `<div class="alert alert-success">Checkout completed successfully!</div>`;
+                    
+                    if (result.product) {
+                        resultHtml += `<p><strong>Product:</strong> ${result.product}</p>`;
+                    }
+                    
+                    if (result.variant) {
+                        resultHtml += `<p><strong>Variant:</strong> ${result.variant}</p>`;
+                    }
+                    
+                    if (result.price) {
+                        resultHtml += `<p><strong>Price:</strong> ${result.price}</p>`;
+                    }
+                    
+                    if (result.order_id) {
+                        resultHtml += `<p><strong>Order ID:</strong> ${result.order_id}</p>`;
+                    }
+                }
+            } else {
+                document.getElementById('statusCompleted').textContent = '❌ Checkout failed';
+                document.getElementById('statusCompleted').className = 'status-failed';
+                
+                resultHtml += `<div class="alert alert-danger">Checkout failed: ${result.message || 'Unknown error'}</div>`;
+                
+                if (result.result) {
+                    resultHtml += `<p><strong>Result:</strong> ${result.result}</p>`;
+                }
+                
+                if (result.product) {
+                    resultHtml += `<p><strong>Product:</strong> ${result.product}</p>`;
+                }
+                
+                if (result.variant) {
+                    resultHtml += `<p><strong>Variant:</strong> ${result.variant}</p>`;
+                }
+                
+                if (result.price) {
+                    resultHtml += `<p><strong>Price:</strong> ${result.price}</p>`;
+                }
+            }
+            
+            document.getElementById('resultDetails').innerHTML = resultHtml;
+        }
+        
+        function showError(message) {
+            clearInterval(statusInterval);
+            document.getElementById('statusRunning').style.display = 'none';
+            document.getElementById('statusCompleted').style.display = 'inline';
+            document.getElementById('statusCompleted').textContent = '❌ Error';
+            document.getElementById('statusCompleted').className = 'status-failed';
+            document.getElementById('resultDetails').innerHTML = `<div class="alert alert-danger">${message}</div>`;
+            document.getElementById('cancelButton').style.display = 'none';
+            document.getElementById('newCheckoutButton').style.display = 'block';
+        }
+        
+        function resetForm() {
+            // Reset form
+            document.getElementById('checkoutForm').reset();
+            
+            // Enable form
+            document.getElementById('checkoutForm').querySelectorAll('input, button').forEach(el => {
+                el.disabled = false;
+            });
+            
+            // Hide result card
+            document.getElementById('resultCard').style.display = 'none';
+            
+            // Reset variables
+            checkoutId = null;
+            clearInterval(statusInterval);
+        }
+    </script>
+</body>
+</html>
