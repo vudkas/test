@@ -5,7 +5,7 @@ import time
 import requests
 import re
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from main import ShopifyPaymentProcessor
+from shopify_bot import ShopifyBot
 
 # Use requests for Telegram instead of the telegram package to avoid dependency issues
 class TelegramSender:
@@ -97,8 +97,34 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, cust
             
             # Process the card
             try:
-                processor = ShopifyPaymentProcessor(custom_proxy)
-                result = processor.process_payment(cc, month, year, cvv, shopify_url)
+                processor = ShopifyBot(custom_proxy)
+                # First fetch product info and add to cart
+                product_info = processor.fetch_product_info(shopify_url)
+                if not product_info:
+                    raise Exception("Failed to fetch product information")
+                    
+                variant = processor.find_lowest_price_variant()
+                if not variant:
+                    raise Exception("Failed to find available variant")
+                    
+                add_result = processor.add_to_cart(variant['id'])
+                if not add_result:
+                    raise Exception("Failed to add product to cart")
+                    
+                checkout_url = processor.get_checkout_url()
+                if not checkout_url:
+                    raise Exception("Failed to get checkout URL")
+                    
+                shipping_url = processor.submit_shipping_info()
+                if not shipping_url:
+                    raise Exception("Failed to submit shipping information")
+                    
+                payment_url = processor.select_shipping_method()
+                if not payment_url:
+                    raise Exception("Failed to select shipping method")
+                    
+                # Process payment
+                result = processor.process_payment(cc, month, year, cvv)
             except Exception as e:
                 result = {
                     'status': False,
@@ -146,7 +172,7 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, cust
 def check_proxy(custom_proxy=None):
     """Check if proxies are working"""
     try:
-        processor = ShopifyPaymentProcessor(custom_proxy)
+        processor = ShopifyBot(custom_proxy)
         response = processor.session.get('https://api.ipify.org?format=json')
         if response.status_code == 200:
             return {'status': True, 'ip': response.json().get('ip', 'Unknown')}
@@ -157,108 +183,26 @@ def check_proxy(custom_proxy=None):
 def check_shopify_url(url, custom_proxy=None):
     """Check if the Shopify URL is valid and can add to cart"""
     try:
-        processor = ShopifyPaymentProcessor(custom_proxy)
-        # Add additional headers for better compatibility
-        processor.session.headers.update({
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'https://www.google.com/',
-            'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"'
-        })
-        response = processor.session.get(url)
+        processor = ShopifyBot(custom_proxy)
         
-        if response.status_code != 200:
-            return {'status': False, 'message': f'Invalid URL, status code: {response.status_code}'}
+        # Use our new product info fetching method
+        product_info = processor.fetch_product_info(url)
+        
+        if not product_info:
+            return {'status': False, 'message': 'Failed to fetch product information'}
             
-        # Check if it's a Shopify site
-        if 'shopify' not in response.text.lower():
-            return {'status': False, 'message': 'Not a Shopify site'}
-            
-        # Try to find product info using multiple regex patterns
-        variant_id = None
-        try:
-            # Try different patterns for variant ID
-            patterns = [
-                r'"variants":\s*\[\s*{\s*"id":\s*(\d+)',
-                r'"id"\s*:\s*(\d+).*?"available"\s*:\s*true',
-                r'variantId\s*:\s*(\d+)',
-                r'variant_id=(\d+)',
-                r'variant_id"\s*:\s*"(\d+)"',
-                r'variant_id"\s*:\s*(\d+)',
-                r'VariantId"\s*:\s*(\d+)'
-            ]
-            
-            for pattern in patterns:
-                variant_match = re.search(pattern, response.text)
-                if variant_match:
-                    variant_id = variant_match.group(1)
-                    break
-                    
-            # If still not found, try to find any product ID
-            if not variant_id:
-                product_match = re.search(r'"product_id"\s*:\s*(\d+)', response.text)
-                if product_match:
-                    variant_id = product_match.group(1)
-        except Exception as e:
-            print(f"Error extracting variant ID: {str(e)}")
-            
-        if not variant_id:
-            return {'status': False, 'message': 'No product variants found'}
-            
-        # Get price
-        price = "Unknown"
-        try:
-            # Try different price patterns
-            price_patterns = [
-                r'"price":\s*(\d+\.\d+|\d+)',
-                r'"price"\s*:\s*"(\d+\.\d+|\d+)"',
-                r'price\s*:\s*[\'"]?(\d+\.\d+|\d+)[\'"]?',
-                r'data-price="(\d+\.\d+|\d+)"'
-            ]
-            
-            for pattern in price_patterns:
-                price_match = re.search(pattern, response.text)
-                if price_match:
-                    price_value = float(price_match.group(1))
-                    # Check if price needs to be divided by 100 (common in Shopify)
-                    if price_value > 1000:
-                        price_value = price_value / 100
-                    price = f"${price_value:.2f}"
-                    break
-        except Exception as e:
-            print(f"Error extracting price: {str(e)}")
-                
-        # Get product title
-        title = "Unknown Product"
-        try:
-            # Try different title patterns
-            title_patterns = [
-                r'"title":\s*"([^"]+)"',
-                r'<title>(.*?)</title>',
-                r'<h1[^>]*>(.*?)</h1>',
-                r'product-title[^>]*>(.*?)<',
-                r'product_title[^>]*>(.*?)<'
-            ]
-            
-            for pattern in title_patterns:
-                title_match = re.search(pattern, response.text)
-                if title_match:
-                    title = title_match.group(1).strip()
-                    # Clean up the title
-                    title = re.sub(r'\s+', ' ', title)
-                    title = title.replace('&amp;', '&').replace('&quot;', '"')
-                    break
-        except Exception as e:
-            print(f"Error extracting title: {str(e)}")
+        # Find the lowest-priced variant
+        variant = processor.find_lowest_price_variant()
+        
+        if not variant:
+            return {'status': False, 'message': 'No available variants found'}
             
         return {
             'status': True, 
             'message': 'Valid Shopify product',
-            'title': title,
-            'price': price,
-            'variant_id': variant_id
+            'title': product_info.get('title', 'Unknown Product'),
+            'price': variant.get('price', 'Unknown'),
+            'variant_id': variant.get('id')
         }
     except Exception as e:
         return {'status': False, 'message': str(e)}
