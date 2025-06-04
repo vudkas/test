@@ -6,6 +6,8 @@
     <title>Shopify Card Checker Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -477,4 +479,860 @@
                         </h2>
                         <div class="flex items-center space-x-3">
                             <button id="filter-all" class="px-3 py-1 rounded-lg text-xs bg-purple-600 text-white">All</button>
-                            <button id="filter-vali
+                            <button id="filter-valid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Valid</button>
+                            <button id="filter-invalid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Invalid</button>
+                        </div>
+                    </div>
+                    <div id="results-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-clipboard-list text-4xl mb-3 opacity-30"></i>
+                            <p>Results will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for checkout details -->
+    <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 hidden">
+        <div class="card-bg glass-effect rounded-3xl p-8 shadow-2xl max-w-2xl w-full mx-4 relative slide-in">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold text-purple-300 mb-6 flex items-center">
+                <i class="fas fa-shopping-cart mr-3 text-purple-400"></i>
+                Checkout Details
+            </h2>
+            <div id="checkout-content" class="space-y-6">
+                <div class="bg-dark-500 p-5 rounded-xl border border-purple-800">
+                    <h3 class="text-lg font-semibold text-purple-300 mb-4">Order Information</h3>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Store</p>
+                                <p id="checkout-store" class="text-sm font-semibold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Product</p>
+                                <p id="checkout-product" class="text-sm font-semibold text-white"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Price</p>
+                            <p id="checkout-price" class="text-sm font-semibold text-white"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-dark-500 p-5 rounded-xl border border-purple-800">
+                    <h3 class="text-lg font-semibold text-purple-300 mb-4">Billing Information</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Name</p>
+                            <p id="checkout-name" class="text-sm font-semibold text-white"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Address</p>
+                            <p id="checkout-address" class="text-sm font-semibold text-white"></p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">City</p>
+                                <p id="checkout-city" class="text-sm font-semibold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">State</p>
+                                <p id="checkout-state" class="text-sm font-semibold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">ZIP</p>
+                                <p id="checkout-zip" class="text-sm font-semibold text-white"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-dark-500 p-5 rounded-xl border border-purple-800">
+                    <h3 class="text-lg font-semibold text-purple-300 mb-4">Payment Information</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1">Card</p>
+                            <p id="checkout-card" class="text-sm font-semibold text-white font-mono"></p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Status</p>
+                                <p id="checkout-status" class="text-sm font-semibold"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Gateway</p>
+                                <p id="checkout-gateway" class="text-sm font-semibold text-white"></p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Transaction ID</p>
+                                <p id="checkout-transaction" class="text-sm font-semibold text-white font-mono"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize animations when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initAnimations();
+            initEventListeners();
+        });
+
+        // GSAP Animations
+        function initAnimations() {
+            // Animate header elements
+            gsap.from('header h3', { 
+                duration: 1.2, 
+                y: -50, 
+                opacity: 0, 
+                ease: 'elastic.out(1, 0.5)'
+            });
+            
+            gsap.from('header p', { 
+                duration: 1, 
+                y: -20, 
+                opacity: 0, 
+                delay: 0.3, 
+                ease: 'power3.out'
+            });
+            
+            // Animate cards with stagger effect
+            gsap.from('.card-bg', { 
+                duration: 0.8, 
+                y: 50, 
+                opacity: 0, 
+                stagger: 0.1, 
+                ease: 'power3.out',
+                delay: 0.5
+            });
+            
+            // Add hover animations to buttons
+            document.querySelectorAll('.btn-primary, .btn-success, .btn-warning, .btn-danger').forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    gsap.to(btn, { 
+                        scale: 1.05, 
+                        duration: 0.3, 
+                        ease: 'power2.out' 
+                    });
+                });
+                
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, { 
+                        scale: 1, 
+                        duration: 0.3, 
+                        ease: 'power2.out' 
+                    });
+                });
+            });
+        }
+
+        // Event Listeners
+        function initEventListeners() {
+            // URL validation
+            document.getElementById('check-url-btn').addEventListener('click', validateShopifyUrl);
+            
+            // Proxy testing
+            document.getElementById('check-proxy-btn').addEventListener('click', testProxy);
+            
+            // Telegram notification testing
+            document.getElementById('test-telegram-btn').addEventListener('click', testTelegramNotification);
+            
+            // Process control buttons
+            document.getElementById('start-btn').addEventListener('click', startProcess);
+            document.getElementById('pause-btn').addEventListener('click', pauseProcess);
+            document.getElementById('stop-btn').addEventListener('click', stopProcess);
+            document.getElementById('clear-btn').addEventListener('click', clearResults);
+            document.getElementById('export-btn').addEventListener('click', exportResults);
+            
+            // Card file upload
+            document.getElementById('cards-file').addEventListener('change', handleFileUpload);
+            
+            // Card input change
+            document.getElementById('cards-input').addEventListener('input', updateCardCount);
+            
+            // Result filters
+            document.getElementById('filter-all').addEventListener('click', () => filterResults('all'));
+            document.getElementById('filter-valid').addEventListener('click', () => filterResults('valid'));
+            document.getElementById('filter-invalid').addEventListener('click', () => filterResults('invalid'));
+            
+            // Modal close button
+            document.getElementById('close-modal').addEventListener('click', closeCheckoutModal);
+        }
+
+        // Shopify URL validation and product info extraction
+        async function validateShopifyUrl() {
+            const urlInput = document.getElementById('shopify-url');
+            const urlResult = document.getElementById('url-result');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showUrlResult('Please enter a Shopify product URL', 'error');
+                return;
+            }
+            
+            // Check if it's a valid Shopify URL
+            if (!isValidShopifyUrl(url)) {
+                showUrlResult('Invalid Shopify URL format', 'error');
+                return;
+            }
+            
+            showUrlResult('Validating URL...', 'loading');
+            
+            try {
+                // Simulate API call to validate and extract product info
+                const productInfo = await fetchProductInfo(url);
+                
+                if (productInfo) {
+                    // Store product info in global state
+                    window.shopifyProduct = productInfo;
+                    
+                    showUrlResult(
+                        `<div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-white">${productInfo.title}</p>
+                                <p class="text-xs text-gray-400">${productInfo.store}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold text-white">${productInfo.price}</p>
+                                <p class="text-xs text-emerald-400">${productInfo.available ? 'In Stock' : 'Out of Stock'}</p>
+                            </div>
+                        </div>`,
+                        'success'
+                    );
+                    
+                    // Enable start button if product is valid
+                    if (productInfo.available) {
+                        document.getElementById('start-btn').disabled = false;
+                    }
+                } else {
+                    showUrlResult('Could not fetch product information', 'error');
+                }
+            } catch (error) {
+                showUrlResult(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Check if URL is a valid Shopify URL
+        function isValidShopifyUrl(url) {
+            try {
+                const parsedUrl = new URL(url);
+                return (
+                    (parsedUrl.hostname.includes('shopify.com') || 
+                     parsedUrl.hostname.includes('myshopify.com') ||
+                     parsedUrl.pathname.includes('/products/'))
+                );
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Simulate fetching product info from Shopify
+        async function fetchProductInfo(url) {
+            // In a real implementation, this would make an API call to your backend
+            // which would then fetch the product info from Shopify
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // For demo purposes, return mock data
+            return {
+                id: 'gid://shopify/Product/1234567890',
+                title: 'Premium Wireless Headphones',
+                description: 'High-quality wireless headphones with noise cancellation',
+                price: '$149.99',
+                compareAtPrice: '$199.99',
+                available: true,
+                store: new URL(url).hostname,
+                variantId: 'gid://shopify/ProductVariant/1234567890',
+                image: 'https://example.com/headphones.jpg'
+            };
+        }
+
+        // Display URL validation result
+        function showUrlResult(message, type) {
+            const urlResult = document.getElementById('url-result');
+            urlResult.innerHTML = message;
+            urlResult.classList.remove('hidden', 'result-success', 'result-error');
+            
+            if (type === 'success') {
+                urlResult.classList.add('result-success');
+            } else if (type === 'error') {
+                urlResult.classList.add('result-error');
+            }
+            
+            // Animate the result
+            gsap.from(urlResult, { 
+                height: 0, 
+                opacity: 0, 
+                duration: 0.3, 
+                ease: 'power2.out' 
+            });
+        }
+
+        // Test proxy connection
+        function testProxy() {
+            const proxyInput = document.getElementById('custom-proxy');
+            const proxyResult = document.getElementById('proxy-result');
+            const proxy = proxyInput.value.trim();
+            
+            if (!proxy) {
+                proxyResult.innerHTML = 'Using default proxy settings';
+                proxyResult.classList.remove('hidden', 'result-success', 'result-error');
+                proxyResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
+                return;
+            }
+            
+            // Validate proxy format
+            const proxyPattern = /^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d+)(?::([^:]+):(.+))?$/;
+            if (!proxyPattern.test(proxy)) {
+                proxyResult.innerHTML = 'Invalid proxy format. Use ip:port or ip:port:user:pass';
+                proxyResult.classList.remove('hidden', 'bg-dark-500', 'border', 'border-purple-800', 'result-success');
+                proxyResult.classList.add('result-error');
+                return;
+            }
+            
+            // Simulate proxy test
+            proxyResult.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Testing proxy connection...';
+            proxyResult.classList.remove('hidden', 'result-success', 'result-error');
+            proxyResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // For demo purposes, randomly succeed or fail
+                const success = Math.random() > 0.3;
+                
+                if (success) {
+                    proxyResult.innerHTML = '<i class="fas fa-check-circle text-emerald-400 mr-2"></i> Proxy connection successful';
+                    proxyResult.classList.remove('bg-dark-500', 'border', 'border-purple-800', 'result-error');
+                    proxyResult.classList.add('result-success');
+                } else {
+                    proxyResult.innerHTML = '<i class="fas fa-times-circle text-red-400 mr-2"></i> Proxy connection failed';
+                    proxyResult.classList.remove('bg-dark-500', 'border', 'border-purple-800', 'result-success');
+                    proxyResult.classList.add('result-error');
+                }
+            }, 2000);
+        }
+
+        // Test Telegram notification
+        function testTelegramNotification() {
+            const tokenInput = document.getElementById('telegram-token');
+            const userIdInput = document.getElementById('telegram-user-id');
+            
+            const token = tokenInput.value.trim();
+            const userId = userIdInput.value.trim();
+            
+            if (!token || !userId) {
+                alert('Please enter both Telegram Bot Token and User ID');
+                return;
+            }
+            
+            // Simulate sending a test message
+            // In a real implementation, this would make an API call to your backend
+            // which would then send a message via the Telegram Bot API
+            
+            // Show loading state on button
+            const button = document.getElementById('test-telegram-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+            button.disabled = true;
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // For demo purposes, always succeed
+                alert('Test notification sent successfully!');
+                
+                // Restore button
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Process variables
+        let processing = false;
+        let paused = false;
+        let cards = [];
+        let currentIndex = 0;
+        let validCards = [];
+        let invalidCards = [];
+        let processingInterval;
+        let startTime;
+
+        // Start processing cards
+        function startProcess() {
+            const cardsInput = document.getElementById('cards-input');
+            const cardText = cardsInput.value.trim();
+            
+            if (!cardText) {
+                alert('Please enter card information');
+                return;
+            }
+            
+            if (!window.shopifyProduct) {
+                alert('Please validate a Shopify URL first');
+                return;
+            }
+            
+            // Parse cards
+            cards = cardText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line && isValidCardFormat(line));
+            
+            if (cards.length === 0) {
+                alert('No valid cards found. Please check the format.');
+                return;
+            }
+            
+            // Reset counters
+            currentIndex = 0;
+            validCards = [];
+            invalidCards = [];
+            
+            // Update UI
+            document.getElementById('total-cards').textContent = cards.length;
+            document.getElementById('processed-cards').textContent = '0';
+            document.getElementById('successful-cards').textContent = '0';
+            document.getElementById('failed-cards').textContent = '0';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-percent').textContent = '0%';
+            document.getElementById('success-rate').textContent = '0%';
+            document.getElementById('processing-speed').textContent = '0 c/m';
+            
+            // Clear results
+            document.getElementById('results-container').innerHTML = '';
+            
+            // Update button states
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = false;
+            
+            // Start processing
+            processing = true;
+            paused = false;
+            startTime = Date.now();
+            
+            // Process cards at regular intervals
+            processingInterval = setInterval(processNextCard, 2000);
+        }
+
+        // Pause processing
+        function pauseProcess() {
+            if (!processing) return;
+            
+            if (paused) {
+                // Resume
+                paused = false;
+                document.getElementById('pause-btn').innerHTML = '<i class="fas fa-pause mb-1"></i>Pause';
+                processingInterval = setInterval(processNextCard, 2000);
+            } else {
+                // Pause
+                paused = true;
+                document.getElementById('pause-btn').innerHTML = '<i class="fas fa-play mb-1"></i>Resume';
+                clearInterval(processingInterval);
+            }
+        }
+
+        // Stop processing
+        function stopProcess() {
+            processing = false;
+            paused = false;
+            clearInterval(processingInterval);
+            
+            // Update button states
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = true;
+            document.getElementById('pause-btn').innerHTML = '<i class="fas fa-pause mb-1"></i>Pause';
+            
+            // Update current card display
+            document.getElementById('current-card').innerHTML = '<i class="fas fa-stop-circle text-red-400 mr-2"></i> Processing stopped';
+        }
+
+        // Process the next card in the queue
+        async function processNextCard() {
+            if (!processing || currentIndex >= cards.length) {
+                if (currentIndex >= cards.length) {
+                    // All cards processed
+                    stopProcess();
+                    document.getElementById('current-card').innerHTML = '<i class="fas fa-check-circle text-emerald-400 mr-2"></i> All cards processed';
+                }
+                return;
+            }
+            
+            const card = cards[currentIndex];
+            currentIndex++;
+            
+            // Update current card display
+            document.getElementById('current-card').innerHTML = `<i class="fas fa-spinner fa-spin text-blue-400 mr-2"></i> ${maskCardNumber(card)}`;
+            
+            // Update progress
+            const progress = Math.round((currentIndex / cards.length) * 100);
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-percent').textContent = `${progress}%`;
+            document.getElementById('processed-cards').textContent = currentIndex;
+            
+            // Calculate processing speed
+            const elapsedMinutes = (Date.now() - startTime) / 60000;
+            const cardsPerMinute = Math.round(currentIndex / elapsedMinutes) || 0;
+            document.getElementById('processing-speed').textContent = `${cardsPerMinute} c/m`;
+            
+            try {
+                // Process the card through Shopify checkout
+                const result = await processCardWithShopify(card);
+                
+                // Update counters based on result
+                if (result.valid) {
+                    validCards.push({ card, result });
+                    document.getElementById('successful-cards').textContent = validCards.length;
+                } else {
+                    invalidCards.push({ card, result });
+                    document.getElementById('failed-cards').textContent = invalidCards.length;
+                }
+                
+                // Update success rate
+                const successRate = Math.round((validCards.length / currentIndex) * 100);
+                document.getElementById('success-rate').textContent = `${successRate}%`;
+                
+                // Add result to the results container
+                addResultToContainer(card, result);
+            } catch (error) {
+                console.error('Error processing card:', error);
+                
+                // Count as invalid
+                invalidCards.push({ card, result: { valid: false, message: error.message } });
+                document.getElementById('failed-cards').textContent = invalidCards.length;
+                
+                // Add error result to container
+                addResultToContainer(card, { valid: false, message: error.message });
+            }
+        }
+
+        // Process a card with Shopify checkout
+        async function processCardWithShopify(card) {
+            // In a real implementation, this would make API calls to:
+            // 1. Add the product to cart
+            // 2. Extract cookies for checkout
+            // 3. Submit billing information
+            // 4. Submit payment information
+            // 5. Complete checkout
+            
+            // Parse card details
+            const [cardNumber, expiryMonth, expiryYear, cvv] = card.split('|');
+            
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Generate random billing information (US address)
+            const billing = generateRandomUSBilling();
+            
+            // For demo purposes, randomly succeed or fail
+            const valid = Math.random() > 0.6;
+            
+            if (valid) {
+                return {
+                    valid: true,
+                    message: 'Payment successful',
+                    transactionId: generateRandomTransactionId(),
+                    gateway: 'Shopify Payments',
+                    billing: billing,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                // Generate random decline reason
+                const declineReasons = [
+                    'Insufficient funds',
+                    'Card declined by issuer',
+                    'Invalid card number',
+                    'Expired card',
+                    'Invalid CVV',
+                    'Address verification failed',
+                    'Suspected fraud'
+                ];
+                const reason = declineReasons[Math.floor(Math.random() * declineReasons.length)];
+                
+                return {
+                    valid: false,
+                    message: reason,
+                    billing: billing,
+                    timestamp: new Date().toISOString()
+                };
+            }
+        }
+
+        // Add a result to the results container
+        function addResultToContainer(card, result) {
+            const resultsContainer = document.getElementById('results-container');
+            
+            // If this is the first result, clear the placeholder
+            if (resultsContainer.querySelector('.text-center.text-gray-500')) {
+                resultsContainer.innerHTML = '';
+            }
+            
+            // Create result element
+            const resultElement = document.createElement('div');
+            resultElement.className = `p-4 rounded-xl ${result.valid ? 'result-success' : 'result-error'} slide-in`;
+            resultElement.dataset.type = result.valid ? 'valid' : 'invalid';
+            
+            // Format card details
+            const [cardNumber, expiryMonth, expiryYear, cvv] = card.split('|');
+            const maskedCard = maskCardNumber(card);
+            
+            // Format timestamp
+            const timestamp = new Date(result.timestamp).toLocaleTimeString();
+            
+            resultElement.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div class="font-mono text-sm">${maskedCard}</div>
+                    <div class="flex items-center">
+                        <span class="text-xs text-gray-400 mr-3">${timestamp}</span>
+                        <i class="fas fa-${result.valid ? 'check' : 'times'}-circle text-${result.valid ? 'emerald' : 'red'}-400"></i>
+                    </div>
+                </div>
+                <div class="mt-2 flex justify-between items-center">
+                    <div class="text-sm ${result.valid ? 'text-emerald-400' : 'text-red-400'}">${result.message}</div>
+                    ${result.valid ? `<button class="view-details px-2 py-1 rounded text-xs bg-purple-700 hover:bg-purple-600 text-white" data-card="${card}">Details</button>` : ''}
+                </div>
+            `;
+            
+            // Add to container at the top
+            resultsContainer.insertBefore(resultElement, resultsContainer.firstChild);
+            
+            // Add event listener for details button
+            if (result.valid) {
+                resultElement.querySelector('.view-details').addEventListener('click', () => {
+                    showCheckoutDetails(card, result);
+                });
+            }
+            
+            // Animate the new result
+            gsap.from(resultElement, { 
+                height: 0, 
+                opacity: 0, 
+                duration: 0.3, 
+                ease: 'power2.out' 
+            });
+        }
+
+        // Show checkout details modal
+        function showCheckoutDetails(card, result) {
+            const modal = document.getElementById('checkout-modal');
+            
+            // Parse card details
+            const [cardNumber, expiryMonth, expiryYear, cvv] = card.split('|');
+            
+            // Fill in checkout details
+            document.getElementById('checkout-store').textContent = window.shopifyProduct.store;
+            document.getElementById('checkout-product').textContent = window.shopifyProduct.title;
+            document.getElementById('checkout-price').textContent = window.shopifyProduct.price;
+            
+            document.getElementById('checkout-name').textContent = result.billing.name;
+            document.getElementById('checkout-address').textContent = result.billing.address;
+            document.getElementById('checkout-city').textContent = result.billing.city;
+            document.getElementById('checkout-state').textContent = result.billing.state;
+            document.getElementById('checkout-zip').textContent = result.billing.zip;
+            
+            document.getElementById('checkout-card').textContent = maskCardNumber(card);
+            
+            const statusElement = document.getElementById('checkout-status');
+            statusElement.textContent = result.valid ? 'Approved' : 'Declined';
+            statusElement.className = `text-sm font-semibold ${result.valid ? 'text-emerald-400' : 'text-red-400'}`;
+            
+            document.getElementById('checkout-gateway').textContent = result.gateway || 'N/A';
+            document.getElementById('checkout-transaction').textContent = result.transactionId || 'N/A';
+            
+            // Show modal
+            modal.classList.remove('hidden');
+            
+            // Animate modal
+            gsap.from('.card-bg.glass-effect', { 
+                scale: 0.8, 
+                opacity: 0, 
+                duration: 0.4, 
+                ease: 'power3.out' 
+            });
+        }
+
+        // Close checkout modal
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkout-modal');
+            
+            // Animate modal out
+            gsap.to('.card-bg.glass-effect', { 
+                scale: 0.8, 
+                opacity: 0, 
+                duration: 0.3, 
+                ease: 'power3.in',
+                onComplete: () => {
+                    modal.classList.add('hidden');
+                    // Reset scale and opacity for next time
+                    gsap.set('.card-bg.glass-effect', { scale: 1, opacity: 1 });
+                }
+            });
+        }
+
+        // Filter results by type
+        function filterResults(type) {
+            const resultsContainer = document.getElementById('results-container');
+            const results = resultsContainer.querySelectorAll('[data-type]');
+            
+            // Update filter button styles
+            document.getElementById('filter-all').className = type === 'all' ? 'px-3 py-1 rounded-lg text-xs bg-purple-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            document.getElementById('filter-valid').className = type === 'valid' ? 'px-3 py-1 rounded-lg text-xs bg-purple-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            document.getElementById('filter-invalid').className = type === 'invalid' ? 'px-3 py-1 rounded-lg text-xs bg-purple-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            
+            // Show/hide results based on filter
+            results.forEach(result => {
+                if (type === 'all' || result.dataset.type === type) {
+                    result.style.display = 'block';
+                } else {
+                    result.style.display = 'none';
+                }
+            });
+        }
+
+        // Clear results
+        function clearResults() {
+            document.getElementById('results-container').innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-clipboard-list text-4xl mb-3 opacity-30"></i>
+                    <p>Results will appear here</p>
+                </div>
+            `;
+        }
+
+        // Export results
+        function exportResults() {
+            // Combine valid and invalid cards
+            const allResults = [...validCards, ...invalidCards].sort((a, b) => {
+                return new Date(b.result.timestamp) - new Date(a.result.timestamp);
+            });
+            
+            if (allResults.length === 0) {
+                alert('No results to export');
+                return;
+            }
+            
+            // Format results as CSV
+            let csv = 'Card,Expiry,CVV,Status,Message,Timestamp\n';
+            
+            allResults.forEach(({ card, result }) => {
+                const [cardNumber, expiryMonth, expiryYear, cvv] = card.split('|');
+                const expiry = `${expiryMonth}/${expiryYear}`;
+                const status = result.valid ? 'Valid' : 'Invalid';
+                const message = result.message.replace(/,/g, ' ');
+                const timestamp = result.timestamp;
+                
+                csv += `${cardNumber},${expiry},${cvv},${status},${message},${timestamp}\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `card-results-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Handle file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const contents = e.target.result;
+                document.getElementById('cards-input').value = contents;
+                updateCardCount();
+            };
+            reader.readAsText(file);
+        }
+
+        // Update card count
+        function updateCardCount() {
+            const cardsInput = document.getElementById('cards-input');
+            const cardText = cardsInput.value.trim();
+            
+            const cards = cardText ? cardText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line && isValidCardFormat(line)) : [];
+            
+            document.getElementById('card-count-display').textContent = `${cards.length} cards`;
+            document.getElementById('total-cards').textContent = cards.length;
+        }
+
+        // Check if card format is valid
+        function isValidCardFormat(card) {
+            const parts = card.split('|');
+            return parts.length === 4 && 
+                   /^\d{13,19}$/.test(parts[0]) && // Card number
+                   /^\d{1,2}$/.test(parts[1]) &&   // Month
+                   /^\d{2,4}$/.test(parts[2]) &&   // Year
+                   /^\d{3,4}$/.test(parts[3]);     // CVV
+        }
+
+        // Mask card number for display
+        function maskCardNumber(card) {
+            const parts = card.split('|');
+            const cardNumber = parts[0];
+            const masked = cardNumber.slice(0, 6) + 'xxxxxx' + cardNumber.slice(-4);
+            return `${masked}|${parts[1]}|${parts[2]}|${parts[3]}`;
+        }
+
+        // Generate random US billing information
+        function generateRandomUSBilling() {
+            const firstNames = ['John', 'Jane', 'Michael', 'Emily', 'David', 'Sarah', 'Robert', 'Jennifer'];
+            const lastNames = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson'];
+            
+            const streets = ['Main St', 'Oak Ave', 'Maple Rd', 'Washington Blvd', 'Park Ave', 'Cedar Ln', 'Pine St', 'Elm Dr'];
+            
+            const cities = [
+                { city: 'New York', state: 'NY', zip: '10001' },
+                { city: 'Los Angeles', state: 'CA', zip: '90001' },
+                { city: 'Chicago', state: 'IL', zip: '60601' },
+                { city: 'Houston', state: 'TX', zip: '77001' },
+                { city: 'Phoenix', state: 'AZ', zip: '85001' },
+                { city: 'Philadelphia', state: 'PA', zip: '19101' },
+                { city: 'San Antonio', state: 'TX', zip: '78201' },
+                { city: 'San Diego', state: 'CA', zip: '92101' }
+            ];
+            
+            const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+            const streetNumber = Math.floor(Math.random() * 9000) + 1000;
+            const street = streets[Math.floor(Math.random() * streets.length)];
+            const location = cities[Math.floor(Math.random() * cities.length)];
+            
+            return {
+                name: `${firstName} ${lastName}`,
+                address: `${streetNumber} ${street}`,
+                city: location.city,
+                state: location.state,
+                zip: location.zip,
+                country: 'US'
+            };
+        }
+
+        // Generate random transaction ID
+        function generateRandomTransactionId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 24; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
