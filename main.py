@@ -6,62 +6,99 @@ import time
 import urllib.parse
 import re
 import os
+import sys
+import logging
 from urllib.parse import urlparse, parse_qs
+from bs4 import BeautifulSoup
+from colorama import Fore, Style, init
 
-class ShopifyPaymentProcessor:
+# Initialize colorama for colored terminal output
+init(autoreset=True)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger('shopify_bot')
+
+class ShopifyBot:
     def __init__(self, custom_proxy=None):
+        """
+        Initialize the Shopify Bot with session and proxy configuration.
+        
+        Args:
+            custom_proxy: Optional proxy string in format "ip:port" or "ip:port:user:pass"
+        """
         self.session = requests.Session()
         self.retry_count = 0
-        self.max_retries = 4
-        self.proxies = [
-            "175.29.135.7:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "46.3.135.7:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "158.46.160.8:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "37.218.219.8:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "46.3.63.7:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "37.218.221.8:5433:5K05CT880J2D:VE1MSDRGFDZB",
-            "81.180.253.7:5433:1ADM7A56GE0B:8YD2Y736XJ10",
-            "178.171.88.7:5433:1ADM7A56GE0B:8YD2Y736XJ10",
-            "85.28.57.8:5433:1ADM7A56GE0B:8YD2Y736XJ10",
-            "45.140.172.7:5433:1ADM7A56GE0B:8YD2Y736XJ10",
-            "91.108.230.8:5433:1ADM7A56GE0B:8YD2Y736XJ10",
-            "178.171.106.8:5433:1ADM7A56GE0B:8YD2Y736XJ10"
-        ]
+        self.max_retries = 3
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        
+        # Set default headers for all requests
+        self.session.headers.update({
+            'User-Agent': self.user_agent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0'
+        })
+        
+        # Store checkout information
+        self.product_info = {}
+        self.checkout_url = None
+        self.checkout_token = None
+        self.shipping_url = None
+        self.payment_url = None
+        
+        # Configure proxy if provided
         self.custom_proxy = custom_proxy
-        self.setup_proxy()
+        self.configure_proxy()
 
-    def setup_proxy(self):
-        if self.custom_proxy:
-            # Use custom proxy if provided
-            try:
-                parts = self.custom_proxy.split(':')
-                if len(parts) == 2:  # IP:PORT format
-                    proxy_url = f"http://{parts[0]}:{parts[1]}"
-                elif len(parts) == 4:  # IP:PORT:USER:PASS format
-                    proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
-                else:
-                    # Invalid format, fall back to default proxies
-                    proxy_str = random.choice(self.proxies)
-                    parts = proxy_str.split(':')
-                    proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
-            except Exception:
-                # If any error occurs, fall back to default proxies
-                proxy_str = random.choice(self.proxies)
-                parts = proxy_str.split(':')
-                proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
-        else:
-            # Use random proxy from the list
-            proxy_str = random.choice(self.proxies)
-            parts = proxy_str.split(':')
-            proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+    def configure_proxy(self):
+        """
+        Configure the proxy for the session.
+        
+        Args:
+            custom_proxy: Proxy string in format "ip:port" or "ip:port:user:pass"
+        """
+        if not self.custom_proxy:
+            logger.info("No proxy configured")
+            return
             
-        self.session.proxies = {'http': proxy_url, 'https': proxy_url}
+        try:
+            parts = self.custom_proxy.split(':')
+            if len(parts) == 2:  # IP:PORT format
+                proxy_url = f"http://{parts[0]}:{parts[1]}"
+            elif len(parts) == 4:  # IP:PORT:USER:PASS format
+                proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
+            else:
+                logger.warning("Invalid proxy format")
+                return
+                
+            self.session.proxies.update({
+                'http': proxy_url,
+                'https': proxy_url
+            })
+            logger.info(f"{Fore.GREEN}Proxy configured successfully{Style.RESET_ALL}")
+        except Exception as e:
+            logger.error(f"{Fore.RED}Error configuring proxy: {e}{Style.RESET_ALL}")
 
     def generate_random_string(self, length):
+        """Generate a random string of specified length"""
         return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
     def extract_between(self, text, start, end):
+        """Extract text between two markers"""
         try:
             start_idx = text.find(start)
             if start_idx == -1:
@@ -71,8 +108,161 @@ class ShopifyPaymentProcessor:
             if end_idx == -1:
                 return None
             return text[start_idx:end_idx]
-        except:
+        except Exception:
             return None
+            
+    def fetch_product_info(self, product_url):
+        """
+        Fetch product information from a Shopify product URL.
+        
+        Args:
+            product_url: URL of the product page
+            
+        Returns:
+            Dictionary with product information including variants
+        """
+        logger.info(f"{Fore.BLUE}Fetching product information from: {product_url}{Style.RESET_ALL}")
+        
+        try:
+            response = self.session.get(product_url, timeout=10)
+            
+            if response.status_code != 200:
+                logger.error(f"{Fore.RED}Failed to get product page: {response.status_code}{Style.RESET_ALL}")
+                return None
+                
+            # Parse the HTML content
+            soup = BeautifulSoup(response.text, 'lxml')
+            
+            # Extract product title
+            product_title = None
+            title_elem = soup.select_one('h1.product-single__title, h1.product__title, h1')
+            if title_elem:
+                product_title = title_elem.text.strip()
+            
+            # Extract product price
+            product_price = None
+            price_elem = soup.select_one('[data-product-price], .price__current, .product__price')
+            if price_elem:
+                price_text = price_elem.text.strip()
+                # Extract digits and decimal point from price text
+                price_match = re.search(r'[\d,.]+', price_text)
+                if price_match:
+                    product_price = price_match.group(0).replace(',', '')
+            
+            # Extract product variants
+            variants = []
+            
+            # Method 1: Look for variants in JSON data
+            json_match = re.search(r'var\s+meta\s*=\s*({.*?});', response.text, re.DOTALL) or \
+                         re.search(r'window\.meta\s*=\s*({.*?});', response.text, re.DOTALL) or \
+                         re.search(r'var\s+product\s*=\s*({.*?});', response.text, re.DOTALL)
+                         
+            if json_match:
+                try:
+                    product_json = json.loads(json_match.group(1))
+                    if 'product' in product_json:
+                        product_data = product_json['product']
+                        if 'variants' in product_data:
+                            for variant in product_data['variants']:
+                                variant_info = {
+                                    'id': variant.get('id'),
+                                    'title': variant.get('title'),
+                                    'price': variant.get('price'),
+                                    'available': variant.get('available', True)
+                                }
+                                variants.append(variant_info)
+                except json.JSONDecodeError:
+                    pass
+            
+            # Method 2: Look for variant options in select elements
+            if not variants:
+                variant_selects = soup.select('select[name="id"], select[id*="ProductSelect"]')
+                for select in variant_selects:
+                    for option in select.select('option'):
+                        if option.get('value') and not option.get('disabled'):
+                            price_text = option.text
+                            price_match = re.search(r'[\d,.]+', price_text)
+                            price = price_match.group(0).replace(',', '') if price_match else None
+                            
+                            variant_info = {
+                                'id': option.get('value'),
+                                'title': option.text.strip(),
+                                'price': price,
+                                'available': True
+                            }
+                            variants.append(variant_info)
+            
+            # If no variants found, create a default variant with the product price
+            if not variants:
+                # Try to find variant ID in the page
+                variant_id_match = re.search(r'"id":(\d+),"available":true', response.text) or \
+                                  re.search(r'value="(\d+)"[^>]*>.*?</option>', response.text) or \
+                                  re.search(r'name="id"[^>]*value="(\d+)"', response.text)
+                                  
+                if variant_id_match:
+                    variant_id = variant_id_match.group(1)
+                    variants.append({
+                        'id': variant_id,
+                        'title': 'Default',
+                        'price': product_price,
+                        'available': True
+                    })
+            
+            # Store product information
+            self.product_info = {
+                'title': product_title,
+                'price': product_price,
+                'url': product_url,
+                'variants': variants,
+                'domain': urlparse(product_url).netloc
+            }
+            
+            # Print product information
+            logger.info(f"{Fore.GREEN}Product: {product_title}{Style.RESET_ALL}")
+            logger.info(f"{Fore.GREEN}Price: {product_price}{Style.RESET_ALL}")
+            logger.info(f"{Fore.GREEN}Found {len(variants)} variants{Style.RESET_ALL}")
+            
+            return self.product_info
+            
+        except Exception as e:
+            logger.error(f"{Fore.RED}Error fetching product info: {e}{Style.RESET_ALL}")
+            return None
+    
+    def find_lowest_price_variant(self):
+        """
+        Find the variant with the lowest price from the fetched product information.
+        
+        Returns:
+            Dictionary with the lowest-priced variant information
+        """
+        if not self.product_info or 'variants' not in self.product_info or not self.product_info['variants']:
+            logger.error(f"{Fore.RED}No product variants available{Style.RESET_ALL}")
+            return None
+            
+        available_variants = [v for v in self.product_info['variants'] if v.get('available')]
+        
+        if not available_variants:
+            logger.error(f"{Fore.RED}No available variants found{Style.RESET_ALL}")
+            return None
+            
+        # Convert prices to float for comparison
+        for variant in available_variants:
+            if variant.get('price'):
+                try:
+                    variant['price_float'] = float(variant['price'])
+                except (ValueError, TypeError):
+                    variant['price_float'] = float('inf')
+            else:
+                variant['price_float'] = float('inf')
+        
+        # Find the lowest-priced variant
+        lowest_price_variant = min(available_variants, key=lambda x: x.get('price_float', float('inf')))
+        
+        logger.info(f"{Fore.GREEN}Selected variant: {lowest_price_variant.get('title')}{Style.RESET_ALL}")
+        logger.info(f"{Fore.GREEN}Price: {lowest_price_variant.get('price')}{Style.RESET_ALL}")
+        logger.info(f"{Fore.GREEN}Variant ID: {lowest_price_variant.get('id')}{Style.RESET_ALL}")
+        
+        return lowest_price_variant
 
     def extract_patterns(self, text, patterns):
         results = []
