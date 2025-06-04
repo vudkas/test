@@ -477,4 +477,673 @@
                         </h2>
                         <div class="flex items-center space-x-3">
                             <button id="filter-all" class="px-3 py-1 rounded-lg text-xs bg-purple-600 text-white">All</button>
-                            <button id="filter-vali
+                            <button id="filter-valid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Valid</button>
+                            <button id="filter-invalid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Invalid</button>
+                        </div>
+                    </div>
+                    <div id="results-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                        <div class="text-center text-gray-400 py-8">
+                            <i class="fas fa-clipboard-list text-4xl mb-3 opacity-30"></i>
+                            <p>Results will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for export options -->
+    <div id="export-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+        <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-purple-300">Export Results</h3>
+                <button id="close-export-modal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-3">Export Format</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="export-txt" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                            <i class="fas fa-file-alt mr-2"></i>
+                            Text File
+                        </button>
+                        <button id="export-json" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                            <i class="fas fa-file-code mr-2"></i>
+                            JSON File
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-300 mb-3">Export Options</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="export-all" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                            <i class="fas fa-list mr-2"></i>
+                            All Results
+                        </button>
+                        <button id="export-valid" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Valid Only
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-dark-400 border border-purple-500 rounded-xl p-4 shadow-2xl hidden slide-in z-50 max-w-sm">
+        <div class="flex items-start">
+            <div id="toast-icon" class="text-xl mr-3 mt-1">
+                <i class="fas fa-info-circle text-blue-400"></i>
+            </div>
+            <div class="flex-1">
+                <h4 id="toast-title" class="font-bold text-gray-200 mb-1">Notification</h4>
+                <p id="toast-message" class="text-sm text-gray-300">This is a notification message.</p>
+            </div>
+            <button id="close-toast" class="text-gray-400 hover:text-white ml-2">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // DOM Elements
+        const shopifyUrlInput = document.getElementById('shopify-url');
+        const checkUrlBtn = document.getElementById('check-url-btn');
+        const urlResult = document.getElementById('url-result');
+        
+        const customProxyInput = document.getElementById('custom-proxy');
+        const checkProxyBtn = document.getElementById('check-proxy-btn');
+        const proxyResult = document.getElementById('proxy-result');
+        
+        const telegramTokenInput = document.getElementById('telegram-token');
+        const telegramUserIdInput = document.getElementById('telegram-user-id');
+        const testTelegramBtn = document.getElementById('test-telegram-btn');
+        
+        const cardsInput = document.getElementById('cards-input');
+        const cardsFileInput = document.getElementById('cards-file');
+        const cardCountDisplay = document.getElementById('card-count-display');
+        
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const exportBtn = document.getElementById('export-btn');
+        
+        const totalCardsDisplay = document.getElementById('total-cards');
+        const processedCardsDisplay = document.getElementById('processed-cards');
+        const successfulCardsDisplay = document.getElementById('successful-cards');
+        const failedCardsDisplay = document.getElementById('failed-cards');
+        const currentCardDisplay = document.getElementById('current-card');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercent = document.getElementById('progress-percent');
+        const successRateDisplay = document.getElementById('success-rate');
+        const processingSpeedDisplay = document.getElementById('processing-speed');
+        
+        const resultsContainer = document.getElementById('results-container');
+        const filterAllBtn = document.getElementById('filter-all');
+        const filterValidBtn = document.getElementById('filter-valid');
+        const filterInvalidBtn = document.getElementById('filter-invalid');
+        
+        const exportModal = document.getElementById('export-modal');
+        const closeExportModalBtn = document.getElementById('close-export-modal');
+        const exportTxtBtn = document.getElementById('export-txt');
+        const exportJsonBtn = document.getElementById('export-json');
+        const exportAllBtn = document.getElementById('export-all');
+        const exportValidBtn = document.getElementById('export-valid');
+        
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toast-title');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        const closeToastBtn = document.getElementById('close-toast');
+        
+        // Global variables
+        let isProcessing = false;
+        let isPaused = false;
+        let statusInterval = null;
+        let startTime = null;
+        let currentFilter = 'all';
+        let results = [];
+        
+        // Initialize
+        updateCardCount();
+        
+        // Event Listeners
+        checkUrlBtn.addEventListener('click', checkShopifyUrl);
+        checkProxyBtn.addEventListener('click', checkProxy);
+        testTelegramBtn.addEventListener('click', testTelegram);
+        cardsInput.addEventListener('input', updateCardCount);
+        cardsFileInput.addEventListener('change', handleFileUpload);
+        
+        startBtn.addEventListener('click', startProcess);
+        pauseBtn.addEventListener('click', pauseProcess);
+        stopBtn.addEventListener('click', stopProcess);
+        clearBtn.addEventListener('click', clearResults);
+        exportBtn.addEventListener('click', showExportModal);
+        
+        filterAllBtn.addEventListener('click', () => filterResults('all'));
+        filterValidBtn.addEventListener('click', () => filterResults('valid'));
+        filterInvalidBtn.addEventListener('click', () => filterResults('invalid'));
+        
+        closeExportModalBtn.addEventListener('click', hideExportModal);
+        exportTxtBtn.addEventListener('click', () => exportResults('txt', 'all'));
+        exportJsonBtn.addEventListener('click', () => exportResults('json', 'all'));
+        exportAllBtn.addEventListener('click', () => exportResults('txt', 'all'));
+        exportValidBtn.addEventListener('click', () => exportResults('txt', 'valid'));
+        
+        closeToastBtn.addEventListener('click', hideToast);
+        
+        // Functions
+        function updateCardCount() {
+            const cards = cardsInput.value.split('\n').filter(line => line.trim() !== '');
+            const count = cards.length;
+            cardCountDisplay.textContent = `${count} card${count !== 1 ? 's' : ''}`;
+            totalCardsDisplay.textContent = count;
+        }
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                cardsInput.value = e.target.result;
+                updateCardCount();
+                showToast('success', 'File Uploaded', `Loaded ${cardsInput.value.split('\n').filter(line => line.trim() !== '').length} cards from file.`);
+            };
+            reader.readAsText(file);
+        }
+        
+        async function checkShopifyUrl() {
+            const url = shopifyUrlInput.value.trim();
+            if (!url) {
+                showToast('error', 'Validation Error', 'Please enter a Shopify URL.');
+                return;
+            }
+            
+            urlResult.innerHTML = '<div class="flex items-center justify-center"><i class="fas fa-spinner fa-spin text-purple-400 mr-2"></i> Validating URL...</div>';
+            urlResult.classList.remove('hidden', 'result-success', 'result-error');
+            urlResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
+            
+            try {
+                const response = await fetch('/api/check_url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        url: url,
+                        proxy: customProxyInput.value.trim() || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    urlResult.innerHTML = `
+                        <div class="flex items-center text-emerald-400 mb-2">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span class="font-semibold">Valid Shopify Product</span>
+                        </div>
+                        <div class="text-gray-300 text-xs space-y-1">
+                            <p><span class="text-gray-400">Product:</span> ${data.title}</p>
+                            <p><span class="text-gray-400">Price:</span> ${data.price}</p>
+                            <p><span class="text-gray-400">Variant ID:</span> ${data.variant_id}</p>
+                        </div>
+                    `;
+                    urlResult.classList.remove('bg-dark-500', 'border-purple-800');
+                    urlResult.classList.add('result-success');
+                } else {
+                    urlResult.innerHTML = `
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            <span class="font-semibold">Invalid URL</span>
+                        </div>
+                        <p class="text-gray-300 text-xs mt-1">${data.message}</p>
+                    `;
+                    urlResult.classList.remove('bg-dark-500', 'border-purple-800');
+                    urlResult.classList.add('result-error');
+                }
+            } catch (error) {
+                urlResult.innerHTML = `
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span class="font-semibold">Error</span>
+                    </div>
+                    <p class="text-gray-300 text-xs mt-1">Failed to validate URL: ${error.message}</p>
+                `;
+                urlResult.classList.remove('bg-dark-500', 'border-purple-800');
+                urlResult.classList.add('result-error');
+            }
+        }
+        
+        async function checkProxy() {
+            const proxy = customProxyInput.value.trim();
+            
+            proxyResult.innerHTML = '<div class="flex items-center justify-center"><i class="fas fa-spinner fa-spin text-purple-400 mr-2"></i> Testing proxy...</div>';
+            proxyResult.classList.remove('hidden', 'result-success', 'result-error');
+            proxyResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
+            
+            try {
+                const response = await fetch('/api/check_proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proxy: proxy || null })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    proxyResult.innerHTML = `
+                        <div class="flex items-center text-emerald-400 mb-1">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span class="font-semibold">Proxy Working</span>
+                        </div>
+                        <p class="text-gray-300 text-xs">IP: ${data.ip}</p>
+                    `;
+                    proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
+                    proxyResult.classList.add('result-success');
+                } else {
+                    proxyResult.innerHTML = `
+                        <div class="flex items-center text-red-400">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            <span class="font-semibold">Proxy Error</span>
+                        </div>
+                        <p class="text-gray-300 text-xs mt-1">${data.message}</p>
+                    `;
+                    proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
+                    proxyResult.classList.add('result-error');
+                }
+            } catch (error) {
+                proxyResult.innerHTML = `
+                    <div class="flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span class="font-semibold">Error</span>
+                    </div>
+                    <p class="text-gray-300 text-xs mt-1">Failed to test proxy: ${error.message}</p>
+                `;
+                proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
+                proxyResult.classList.add('result-error');
+            }
+        }
+        
+        async function testTelegram() {
+            const token = telegramTokenInput.value.trim();
+            const userId = telegramUserIdInput.value.trim();
+            
+            if (!token || !userId) {
+                showToast('error', 'Validation Error', 'Please enter both Telegram Bot Token and User ID.');
+                return;
+            }
+            
+            showToast('info', 'Sending Test Message', 'Attempting to send a test message to Telegram...', true);
+            
+            try {
+                // We'll use a simple approach to test Telegram by sending a test card through the processing API
+                const testCard = '4111111111111111|01|2025|123';
+                const response = await fetch('/api/start_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cards: testCard,
+                        shopify_url: shopifyUrlInput.value.trim() || 'https://example.myshopify.com/products/test',
+                        telegram_bot_token: token,
+                        telegram_user_id: userId,
+                        custom_proxy: customProxyInput.value.trim() || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    showToast('success', 'Telegram Test', 'Test message sent! Check your Telegram for the notification.');
+                } else {
+                    showToast('error', 'Telegram Error', `Failed to send test message: ${data.message}`);
+                }
+                
+                // Stop the process after a short delay
+                setTimeout(async () => {
+                    await fetch('/api/stop_process', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }, 2000);
+                
+            } catch (error) {
+                showToast('error', 'Telegram Error', `Failed to send test message: ${error.message}`);
+            }
+        }
+        
+        async function startProcess() {
+            const url = shopifyUrlInput.value.trim();
+            const cards = cardsInput.value.trim();
+            
+            if (!url) {
+                showToast('error', 'Validation Error', 'Please enter a Shopify URL.');
+                return;
+            }
+            
+            if (!cards) {
+                showToast('error', 'Validation Error', 'Please enter at least one card.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/start_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        cards: cards,
+                        shopify_url: url,
+                        telegram_bot_token: telegramTokenInput.value.trim(),
+                        telegram_user_id: telegramUserIdInput.value.trim(),
+                        custom_proxy: customProxyInput.value.trim() || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    isProcessing = true;
+                    isPaused = false;
+                    startTime = Date.now();
+                    
+                    // Update UI
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    stopBtn.disabled = false;
+                    
+                    // Clear previous results
+                    results = [];
+                    updateResultsDisplay();
+                    
+                    // Start status polling
+                    statusInterval = setInterval(fetchStatus, 1000);
+                    
+                    showToast('success', 'Process Started', 'Card processing has started.');
+                } else {
+                    showToast('error', 'Start Error', `Failed to start process: ${data.message}`);
+                }
+            } catch (error) {
+                showToast('error', 'Start Error', `Failed to start process: ${error.message}`);
+            }
+        }
+        
+        async function pauseProcess() {
+            try {
+                const response = await fetch('/api/pause_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    isPaused = data.paused;
+                    
+                    if (isPaused) {
+                        pauseBtn.innerHTML = '<i class="fas fa-play mb-1"></i>Resume';
+                        pauseBtn.classList.remove('btn-warning');
+                        pauseBtn.classList.add('btn-success');
+                        showToast('info', 'Process Paused', 'Card processing has been paused.');
+                    } else {
+                        pauseBtn.innerHTML = '<i class="fas fa-pause mb-1"></i>Pause';
+                        pauseBtn.classList.remove('btn-success');
+                        pauseBtn.classList.add('btn-warning');
+                        showToast('info', 'Process Resumed', 'Card processing has been resumed.');
+                    }
+                } else {
+                    showToast('error', 'Pause Error', `Failed to pause/resume process: ${data.message}`);
+                }
+            } catch (error) {
+                showToast('error', 'Pause Error', `Failed to pause/resume process: ${error.message}`);
+            }
+        }
+        
+        async function stopProcess() {
+            try {
+                const response = await fetch('/api/stop_process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status) {
+                    showToast('info', 'Process Stopping', 'Card processing is being stopped...');
+                    
+                    // We'll let the status polling handle the UI updates
+                } else {
+                    showToast('error', 'Stop Error', `Failed to stop process: ${data.message}`);
+                }
+            } catch (error) {
+                showToast('error', 'Stop Error', `Failed to stop process: ${error.message}`);
+            }
+        }
+        
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                // Update statistics
+                totalCardsDisplay.textContent = data.total_cards;
+                processedCardsDisplay.textContent = data.processed_cards;
+                successfulCardsDisplay.textContent = data.successful_cards;
+                failedCardsDisplay.textContent = data.failed_cards;
+                
+                // Update current card
+                if (data.current_card) {
+                    currentCardDisplay.innerHTML = `<span class="font-mono">${data.current_card}</span>`;
+                } else {
+                    currentCardDisplay.innerHTML = '<i class="fas fa-hourglass-half text-gray-400 mr-2"></i>Awaiting cards...';
+                }
+                
+                // Update progress
+                const progress = data.total_cards > 0 ? (data.processed_cards / data.total_cards) * 100 : 0;
+                progressBar.style.width = `${progress}%`;
+                progressPercent.textContent = `${Math.round(progress)}%`;
+                
+                // Update success rate
+                const successRate = data.processed_cards > 0 ? (data.successful_cards / data.processed_cards) * 100 : 0;
+                successRateDisplay.textContent = `${Math.round(successRate)}%`;
+                
+                // Update processing speed
+                if (startTime) {
+                    const elapsedMinutes = (Date.now() - startTime) / 60000;
+                    const cardsPerMinute = elapsedMinutes > 0 ? Math.round(data.processed_cards / elapsedMinutes) : 0;
+                    processingSpeedDisplay.textContent = `${cardsPerMinute} c/m`;
+                }
+                
+                // Update results
+                if (data.results && data.results.length > results.length) {
+                    results = data.results;
+                    updateResultsDisplay();
+                }
+                
+                // Check if process has stopped
+                if (!data.is_running && isProcessing) {
+                    isProcessing = false;
+                    clearInterval(statusInterval);
+                    
+                    // Reset UI
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    stopBtn.disabled = true;
+                    pauseBtn.innerHTML = '<i class="fas fa-pause mb-1"></i>Pause';
+                    pauseBtn.classList.remove('btn-success');
+                    pauseBtn.classList.add('btn-warning');
+                    
+                    showToast('success', 'Process Complete', 'Card processing has completed.');
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+        
+        function updateResultsDisplay() {
+            // Filter results based on current filter
+            let filteredResults = results;
+            
+            if (currentFilter === 'valid') {
+                filteredResults = results.filter(result => result.status);
+            } else if (currentFilter === 'invalid') {
+                filteredResults = results.filter(result => !result.status);
+            }
+            
+            // Clear container
+            resultsContainer.innerHTML = '';
+            
+            // Add results
+            if (filteredResults.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="text-center text-gray-400 py-8">
+                        <i class="fas fa-clipboard-list text-4xl mb-3 opacity-30"></i>
+                        <p>No results to display</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredResults.forEach(result => {
+                const resultElement = document.createElement('div');
+                resultElement.className = result.status ? 'result-success rounded-xl p-4' : 'result-error rounded-xl p-4';
+                
+                resultElement.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="text-xl mr-3 mt-1">
+                            <i class="fas ${result.status ? 'fa-check-circle text-emerald-400' : 'fa-times-circle text-red-400'}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-mono text-sm mb-2">${result.card}</p>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <p><span class="text-gray-400">Result:</span> ${result.result || 'N/A'}</p>
+                                <p><span class="text-gray-400">Gateway:</span> ${result.gateway || 'N/A'}</p>
+                                <p class="col-span-2"><span class="text-gray-400">Message:</span> ${result.message || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(resultElement);
+            });
+        }
+        
+        function filterResults(filter) {
+            currentFilter = filter;
+            
+            // Update filter buttons
+            filterAllBtn.className = filter === 'all' ? 'px-3 py-1 rounded-lg text-xs bg-purple-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            filterValidBtn.className = filter === 'valid' ? 'px-3 py-1 rounded-lg text-xs bg-emerald-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            filterInvalidBtn.className = filter === 'invalid' ? 'px-3 py-1 rounded-lg text-xs bg-red-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
+            
+            updateResultsDisplay();
+        }
+        
+        function clearResults() {
+            results = [];
+            updateResultsDisplay();
+            
+            // Reset statistics
+            totalCardsDisplay.textContent = '0';
+            processedCardsDisplay.textContent = '0';
+            successfulCardsDisplay.textContent = '0';
+            failedCardsDisplay.textContent = '0';
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+            successRateDisplay.textContent = '0%';
+            processingSpeedDisplay.textContent = '0 c/m';
+            currentCardDisplay.innerHTML = '<i class="fas fa-hourglass-half text-gray-400 mr-2"></i>Awaiting cards...';
+            
+            showToast('info', 'Results Cleared', 'All results have been cleared.');
+        }
+        
+        function showExportModal() {
+            if (results.length === 0) {
+                showToast('error', 'Export Error', 'No results to export.');
+                return;
+            }
+            
+            exportModal.classList.remove('hidden');
+        }
+        
+        function hideExportModal() {
+            exportModal.classList.add('hidden');
+        }
+        
+        function exportResults(format, type) {
+            // Filter results if needed
+            let dataToExport = results;
+            if (type === 'valid') {
+                dataToExport = results.filter(result => result.status);
+            }
+            
+            if (dataToExport.length === 0) {
+                showToast('error', 'Export Error', 'No results to export.');
+                hideExportModal();
+                return;
+            }
+            
+            let content = '';
+            let filename = '';
+            
+            if (format === 'txt') {
+                // Format as text
+                dataToExport.forEach(result => {
+                    content += `${result.card} | ${result.status ? 'VALID' : 'INVALID'} | ${result.message || 'N/A'}\n`;
+                });
+                filename = `card_results_${new Date().toISOString().slice(0, 10)}.txt`;
+            } else {
+                // Format as JSON
+                content = JSON.stringify(dataToExport, null, 2);
+                filename = `card_results_${new Date().toISOString().slice(0, 10)}.json`;
+            }
+            
+            // Create download link
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            hideExportModal();
+            showToast('success', 'Export Complete', `Results exported to ${filename}`);
+        }
+        
+        function showToast(type, title, message, autoHide = true) {
+            // Set toast content
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            // Set toast icon
+            if (type === 'success') {
+                toastIcon.innerHTML = '<i class="fas fa-check-circle text-emerald-400"></i>';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '<i class="fas fa-exclamation-circle text-red-400"></i>';
+            } else if (type === 'warning') {
+                toastIcon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-400"></i>';
+            } else {
+                toastIcon.innerHTML = '<i class="fas fa-info-circle text-blue-400"></i>';
+            }
+            
+            // Show toast
+            toast.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            if (autoHide) {
+                setTimeout(hideToast, 5000);
+            }
+        }
+        
+        function hideToast() {
+            toast.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
