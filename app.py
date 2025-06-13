@@ -98,7 +98,7 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, cust
             # Process the card
             try:
                 # Initialize the enhanced bot
-                processor = EnhancedShopifyBot(custom_proxy)
+                processor = EnhancedShopifyBot(custom_proxy=custom_proxy)
                 
                 # Test the checkout process
                 result = processor.test_checkout(shopify_url, cc, month, year, cvv)
@@ -169,7 +169,7 @@ def process_cards(cards, shopify_url, telegram_bot_token, telegram_user_id, cust
 def check_proxy(custom_proxy=None):
     """Check if proxies are working"""
     try:
-        processor = EnhancedShopifyBot(custom_proxy)
+        processor = EnhancedShopifyBot(custom_proxy=custom_proxy)
         response = processor.session.get('https://api.ipify.org?format=json')
         if response.status_code == 200:
             return {'status': True, 'ip': response.json().get('ip', 'Unknown')}
@@ -180,7 +180,7 @@ def check_proxy(custom_proxy=None):
 def check_shopify_url(url, custom_proxy=None):
     """Check if the Shopify URL is valid and can add to cart"""
     try:
-        processor = EnhancedShopifyBot(custom_proxy)
+        processor = EnhancedShopifyBot(custom_proxy=custom_proxy)
 
         # Get product info
         product_info = processor.get_product_info(url)

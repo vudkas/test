@@ -31,19 +31,15 @@ class EnhancedShopifyBot(ShopifyBot):
     Enhanced version of ShopifyBot with improved functionality
     """
     
-    def __init__(self, proxy=None):
+    def __init__(self, custom_proxy=None):
         """
         Initialize the bot with a session and proxy
         
         Args:
-            proxy: Optional proxy string in format "ip:port:user:pass"
+            custom_proxy: Optional proxy string in format "ip:port:user:pass"
         """
-        super().__init__()
+        super().__init__(custom_proxy)
         
-        # Configure proxy if provided
-        if proxy:
-            self.configure_proxy(proxy)
-            
         # Add better user agent and headers
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -65,30 +61,7 @@ class EnhancedShopifyBot(ShopifyBot):
         self.shipping_url = None
         self.payment_url = None
         
-    def configure_proxy(self, proxy):
-        """
-        Configure the proxy for the session
-        
-        Args:
-            proxy: Proxy string in format "ip:port:user:pass"
-        """
-        try:
-            parts = proxy.split(':')
-            if len(parts) == 2:  # IP:PORT format
-                proxy_url = f"http://{parts[0]}:{parts[1]}"
-            elif len(parts) == 4:  # IP:PORT:USER:PASS format
-                proxy_url = f"http://{parts[2]}:{parts[3]}@{parts[0]}:{parts[1]}"
-            else:
-                logger.warning(f"Invalid proxy format: {proxy}")
-                return
-                
-            self.session.proxies.update({
-                'http': proxy_url,
-                'https': proxy_url
-            })
-            logger.info(f"Proxy configured successfully: {proxy}")
-        except Exception as e:
-            logger.error(f"Error configuring proxy: {e}")
+    # Proxy configuration is handled by the parent class
             
     def generate_random_user_data(self):
         """Generate random user data for shipping/billing"""
@@ -135,23 +108,64 @@ class EnhancedShopifyBot(ShopifyBot):
             # Parse the HTML content
             soup = BeautifulSoup(response.text, 'lxml')
             
-            # Extract product title
+            # Extract product title - try multiple selectors
             product_title = None
-            title_elem = soup.select_one('h1.product-single__title, h1.product__title, h1')
-            if title_elem:
-                product_title = title_elem.text.strip()
-                logger.info(f"Found product title: {product_title}")
+            title_selectors = [
+                'h1.product-single__title', 
+                'h1.product__title', 
+                'h1.product-title',
+                'h1[data-product-title]',
+                'h1.product-meta__title',
+                'h1'
+            ]
             
-            # Extract product price
+            for selector in title_selectors:
+                title_elem = soup.select_one(selector)
+                if title_elem:
+                    product_title = title_elem.text.strip()
+                    logger.info(f"Found product title: {product_title}")
+                    break
+            
+            # Extract product price - try multiple selectors
             product_price = None
-            price_elem = soup.select_one('[data-product-price], .price__current, .product__price')
-            if price_elem:
-                price_text = price_elem.text.strip()
-                # Extract digits and decimal point from price text
-                price_match = re.search(r'[\d,.]+', price_text)
-                if price_match:
-                    product_price = price_match.group(0).replace(',', '')
-                    logger.info(f"Found product price: {product_price}")
+            price_selectors = [
+                '[data-product-price]', 
+                '.price__current', 
+                '.product__price',
+                '.product-price',
+                '.price-item--regular',
+                '.price',
+                '[data-price]',
+                '[data-current-price]',
+                '.product-single__price'
+            ]
+            
+            for selector in price_selectors:
+                price_elem = soup.select_one(selector)
+                if price_elem:
+                    price_text = price_elem.text.strip()
+                    # Extract digits and decimal point from price text
+                    price_match = re.search(r'[\d,.]+', price_text)
+                    if price_match:
+                        product_price = price_match.group(0).replace(',', '')
+                        logger.info(f"Found product price: {product_price}")
+                        break
+                        
+            # If we still don't have a price, try to find it in the page content
+            if not product_price:
+                price_patterns = [
+                    r'"price":\s*"?([\d.]+)"?',
+                    r'"price":\s*(\d+\.\d+)',
+                    r'data-product-price="([\d.]+)"',
+                    r'data-price="([\d.]+)"'
+                ]
+                
+                for pattern in price_patterns:
+                    price_match = re.search(pattern, response.text)
+                    if price_match:
+                        product_price = price_match.group(1)
+                        logger.info(f"Found product price using regex: {product_price}")
+                        break
             
             # Extract variant ID
             variant_id = None
@@ -195,7 +209,30 @@ class EnhancedShopifyBot(ShopifyBot):
                     r'variantId[\'"]?\s*:\s*[\'"]?(\d+)[\'"]?',
                     r'ProductSelect[\'"]?.*?value=[\'"]?(\d+)[\'"]?',
                     r'product-variant-id[\'"]?\s*:\s*[\'"]?(\d+)[\'"]?',
-                    r'data-variant-id=[\'"]?(\d+)[\'"]?'
+                    r'data-variant-id=[\'"]?(\d+)[\'"]?',
+                    r'data-product-id=[\'"]?(\d+)[\'"]?',
+                    r'data-product-variant=[\'"]?(\d+)[\'"]?',
+                    r'data-id=[\'"]?(\d+)[\'"]?',
+                    r'data-variant=[\'"]?(\d+)[\'"]?',
+                    r'"variants":\[{"id":(\d+)',
+                    r'"product":{"id":\d+,"title":"[^"]+","handle":"[^"]+","variants":\[{"id":(\d+)',
+                    r'<option\s+value="(\d+)"',
+                    r'<input\s+type="hidden"\s+name="id"\s+value="(\d+)"',
+                    r'<input\s+type="radio"\s+name="id"\s+value="(\d+)"',
+                    r'<select\s+name="id"[^>]*>.*?<option[^>]*value="(\d+)"[^>]*selected',
+                    r'<select\s+id="product-select"[^>]*>.*?<option[^>]*value="(\d+)"',
+                    r'<select\s+id="ProductSelect-[^"]+"[^>]*>.*?<option[^>]*value="(\d+)"',
+                    r'<select\s+name="id"[^>]*>.*?<option[^>]*value="(\d+)"',
+                    r'<input\s+type="hidden"\s+name="product-id"\s+value="(\d+)"',
+                    r'<button\s+[^>]*data-variant-id="(\d+)"',
+                    r'<form\s+[^>]*data-product-id="(\d+)"',
+                    r'<form\s+[^>]*data-variant-id="(\d+)"',
+                    r'<div\s+[^>]*data-variant-id="(\d+)"',
+                    r'<div\s+[^>]*data-product-id="(\d+)"',
+                    r'<a\s+[^>]*data-variant-id="(\d+)"',
+                    r'<a\s+[^>]*data-product-id="(\d+)"',
+                    r'<span\s+[^>]*data-variant-id="(\d+)"',
+                    r'<span\s+[^>]*data-product-id="(\d+)"'
                 ]
                 
                 for pattern in variant_patterns:
@@ -318,7 +355,85 @@ class EnhancedShopifyBot(ShopifyBot):
                 logger.warning(f"Failed with endpoint {endpoint}: {e}")
                 continue
                 
-        logger.error("All cart endpoints failed")
+        logger.warning("All cart endpoints failed, trying alternative methods")
+        
+        # Try alternative method 1: Direct form submission from product page
+        try:
+            product_url = product_info.get('url')
+            if product_url:
+                logger.info(f"Trying direct form submission from product page: {product_url}")
+                response = self.session.get(product_url, timeout=15)
+                
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'lxml')
+                    
+                    # Find the add to cart form
+                    cart_form = soup.select_one('form[action*="/cart/add"]')
+                    
+                    if cart_form:
+                        # Get the form action
+                        form_action = cart_form.get('action')
+                        if not form_action:
+                            form_action = f"https://{domain}/cart/add"
+                        elif not form_action.startswith('http'):
+                            form_action = f"https://{domain}{form_action}"
+                        
+                        # Prepare form data from the form
+                        form_data = {}
+                        for input_elem in cart_form.select('input'):
+                            name = input_elem.get('name')
+                            value = input_elem.get('value')
+                            if name:
+                                form_data[name] = value
+                        
+                        # Make sure we have the variant ID
+                        if 'id' not in form_data:
+                            form_data['id'] = variant_id
+                        
+                        # Set quantity
+                        form_data['quantity'] = 1
+                        
+                        # Submit the form
+                        logger.info(f"Submitting form to {form_action} with data: {form_data}")
+                        response = self.session.post(form_action, data=form_data, timeout=15)
+                        
+                        if response.status_code in (200, 302):
+                            logger.info(f"Successfully added to cart using form submission")
+                            return True
+                        else:
+                            logger.warning(f"Failed to add to cart using form submission: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Error with alternative add to cart method 1: {e}")
+        
+        # Try alternative method 2: Direct cart URL
+        try:
+            cart_url = f"https://{domain}/cart/{variant_id}:1"
+            logger.info(f"Trying direct cart URL: {cart_url}")
+            response = self.session.get(cart_url, timeout=15)
+            
+            if response.status_code in (200, 302):
+                logger.info(f"Successfully added to cart using direct cart URL")
+                return True
+            else:
+                logger.warning(f"Failed to add to cart using direct cart URL: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Error with direct cart URL: {e}")
+        
+        # Try alternative method 3: GET request to add.js
+        try:
+            get_cart_url = f"https://{domain}/cart/add.js?id={variant_id}&quantity=1"
+            logger.info(f"Trying GET request to add.js: {get_cart_url}")
+            response = self.session.get(get_cart_url, timeout=15)
+            
+            if response.status_code in (200, 302):
+                logger.info(f"Successfully added to cart using GET request to add.js")
+                return True
+            else:
+                logger.warning(f"Failed to add to cart using GET request to add.js: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Error with GET request to add.js: {e}")
+        
+        logger.error("All add to cart methods failed")
         return False
         
     def get_checkout_url(self, product_info):
