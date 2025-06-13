@@ -63,7 +63,7 @@
             background: linear-gradient(135deg, #581c87, #7e22ce, #9333ea);
             box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.5);
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.7; transform: scale(1.02); }
@@ -71,7 +71,7 @@
         .animate-pulse-custom {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        
+
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -79,7 +79,7 @@
         .slide-in {
             animation: slideIn 0.3s ease-out;
         }
-        
+
         @keyframes glow {
             0%, 100% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.3), 0 0 40px rgba(147, 51, 234, 0.1); }
             50% { box-shadow: 0 0 30px rgba(147, 51, 234, 0.6), 0 0 60px rgba(147, 51, 234, 0.2); }
@@ -87,7 +87,7 @@
         .glow-effect {
             animation: glow 2s ease-in-out infinite;
         }
-        
+
         @keyframes sparkle {
             0% { transform: rotate(0deg) scale(0); opacity: 0; }
             50% { transform: rotate(180deg) scale(1); opacity: 1; }
@@ -96,7 +96,7 @@
         .sparkle {
             animation: sparkle 1.5s ease-in-out infinite;
         }
-        
+
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -104,25 +104,25 @@
         .float {
             animation: float 3s ease-in-out infinite;
         }
-        
+
         .glass-effect {
             background: rgba(10, 10, 12, 0.9);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(147, 51, 234, 0.3);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        
+
         .gradient-bg {
             background: linear-gradient(135deg, #040406 0%, #08080a 25%, #0c0c0e 50%, #101012 75%, #141417 100%);
             background-attachment: fixed;
         }
-        
+
         .card-bg {
             background: linear-gradient(135deg, rgba(10, 10, 12, 0.95) 0%, rgba(18, 18, 20, 0.9) 100%);
             border: 1px solid rgba(147, 51, 234, 0.25);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #7e22ce, #9333ea, #a855f7);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -136,7 +136,7 @@
         .btn-primary:active {
             transform: translateY(-1px);
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, #059669, #10b981, #34d399);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -147,7 +147,7 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
         }
-        
+
         .btn-warning {
             background: linear-gradient(135deg, #d97706, #f59e0b, #fbbf24);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -158,7 +158,7 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
         }
-        
+
         .btn-danger {
             background: linear-gradient(135deg, #dc2626, #ef4444, #f87171);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -169,25 +169,25 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4);
         }
-        
+
         .result-success {
             background: linear-gradient(135deg, rgba(5, 150, 105, 0.15), rgba(16, 185, 129, 0.1));
             border: 1px solid rgba(16, 185, 129, 0.4);
             box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
         }
-        
+
         .result-error {
             background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(239, 68, 68, 0.1));
             border: 1px solid rgba(239, 68, 68, 0.4);
             box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);
         }
-        
+
         .progress-bar {
             background: linear-gradient(90deg, #7e22ce, #9333ea, #a855f7, #c084fc);
             box-shadow: 0 0 25px rgba(147, 51, 234, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
             animation: glow 2s ease-in-out infinite;
         }
-        
+
         .input-focus {
             transition: all 0.3s ease;
         }
@@ -195,7 +195,7 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(147, 51, 234, 0.2);
         }
-        
+
         .stat-card {
             transition: all 0.3s ease;
         }
@@ -203,7 +203,7 @@
             transform: translateY(-5px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
-        
+
         .neon-text {
             text-shadow: 0 0 10px rgba(147, 51, 234, 0.8), 0 0 20px rgba(147, 51, 234, 0.6), 0 0 30px rgba(147, 51, 234, 0.4);
         }
@@ -218,7 +218,7 @@
             <div class="relative z-10">
                 <h3 class="text-6xl font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent mb-4 neon-text">
                     <i class="fas fa-shield-alt mr-4"></i>
-                    ROBIN Checker
+                    Shopify Card Checker Pro
                 </h3>
                 <p class="text-gray-400 text-xl mb-6">Advanced Payment Validation System</p>
                 <div class="flex justify-center items-center space-x-4 mb-6">
@@ -238,6 +238,10 @@
                     <div class="flex items-center">
                         <i class="fas fa-chart-line text-blue-400 mr-2"></i>
                         Advanced Analytics
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-robot text-purple-400 mr-2"></i>
+                        Enhanced Bot Technology
                     </div>
                 </div>
             </div>
@@ -312,83 +316,12 @@
                                 <i class="fas fa-user text-purple-400 mr-2"></i>
                                 User ID
                             </label>
-                            <input type="text" id="telegram-user-id" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-4 px-5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-300" placeholder="123456789">
+                            <input type="text" id="telegram-user-id" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-4 px-5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-300" placeholder="User ID">
                         </div>
                         <button id="test-telegram-btn" class="w-full btn-primary text-white font-semibold py-4 px-6 rounded-xl flex items-center justify-center">
                             <i class="fas fa-paper-plane mr-2"></i>
-                            Test Notification
+                            Test Notifications
                         </button>
-                    </div>
-                </div>
-
-                <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500">
-                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
-                        <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse sparkle"></div>
-                        <i class="fas fa-cogs mr-2"></i>
-                        Process Control
-                    </h2>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button id="start-btn" class="btn-success text-white font-semibold py-4 px-3 rounded-xl text-sm flex flex-col items-center">
-                            <i class="fas fa-play mb-1"></i>
-                            Start
-                        </button>
-                        <button id="pause-btn" class="btn-warning text-white font-semibold py-4 px-3 rounded-xl text-sm flex flex-col items-center" disabled>
-                            <i class="fas fa-pause mb-1"></i>
-                            Pause
-                        </button>
-                        <button id="stop-btn" class="btn-danger text-white font-semibold py-4 px-3 rounded-xl text-sm flex flex-col items-center" disabled>
-                            <i class="fas fa-stop mb-1"></i>
-                            Stop
-                        </button>
-                    </div>
-                    <div class="mt-5 grid grid-cols-2 gap-3">
-                        <button id="clear-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
-                            <i class="fas fa-trash mr-2"></i>
-                            Clear
-                        </button>
-                        <button id="export-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
-                            <i class="fas fa-download mr-2"></i>
-                            Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="xl:col-span-1">
-                <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl h-full hover:shadow-purple-500/20 transition-all duration-500">
-                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
-                        <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse sparkle"></div>
-                        <i class="fas fa-database mr-2"></i>
-                        Card Database
-                    </h2>
-                    <div class="space-y-5 h-full flex flex-col">
-                        <div class="flex-grow">
-                            <label for="cards-input" class="block text-sm font-semibold text-gray-300 mb-3 flex items-center justify-between">
-                                <span class="flex items-center">
-                                    <i class="fas fa-credit-card text-purple-400 mr-2"></i>
-                                    Card List
-                                </span>
-                                <span id="card-count-display" class="text-purple-400 text-xs">0 cards</span>
-                            </label>
-                            <textarea id="cards-input" rows="18" class="w-full h-full bg-dark-500 border border-purple-800 rounded-xl py-4 px-5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-300 font-mono text-sm resize-none" placeholder="4111111111111111|01|2025|123"></textarea>
-                        </div>
-                        <div>
-                            <label for="cards-file" class="block text-sm font-semibold text-gray-300 mb-3 flex items-center">
-                                <i class="fas fa-file-upload text-purple-400 mr-2"></i>
-                                Upload File
-                            </label>
-                            <input type="file" id="cards-file" accept=".txt" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-4 px-5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-300 file:bg-purple-600 file:border-0 file:rounded-lg file:px-4 file:py-2 file:text-white file:mr-4">
-                        </div>
-                        <div class="bg-dark-400 p-5 rounded-xl border border-purple-800">
-                            <p class="text-sm text-purple-300 font-semibold flex items-center mb-2">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                Format Requirements:
-                            </p>
-                            <div class="space-y-1">
-                                <p class="text-xs text-gray-400">Pattern: CARD|MONTH|YEAR|CVV</p>
-                                <p class="text-xs text-purple-400 font-mono bg-dark-500 p-2 rounded">4111111111111111|01|2025|123</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -397,94 +330,119 @@
                 <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500">
                     <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
                         <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse sparkle"></div>
-                        <i class="fas fa-chart-bar mr-2"></i>
-                        Process Statistics
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Card Input
                     </h2>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div class="bg-dark-400 p-6 rounded-2xl border border-purple-800 text-center stat-card hover:border-purple-600">
-                            <div class="flex items-center justify-center mb-3">
-                                <i class="fas fa-layer-group text-purple-400 text-2xl"></i>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-2">Total Cards</p>
-                            <p id="total-cards" class="text-3xl font-bold text-purple-400">0</p>
-                        </div>
-                        <div class="bg-dark-400 p-6 rounded-2xl border border-purple-800 text-center stat-card hover:border-blue-600">
-                            <div class="flex items-center justify-center mb-3">
-                                <i class="fas fa-sync-alt text-blue-400 text-2xl"></i>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-2">Processed</p>
-                            <p id="processed-cards" class="text-3xl font-bold text-blue-400">0</p>
-                        </div>
-                        <div class="bg-dark-400 p-6 rounded-2xl border border-purple-800 text-center stat-card hover:border-emerald-600">
-                            <div class="flex items-center justify-center mb-3">
-                                <i class="fas fa-check-circle text-emerald-400 text-2xl"></i>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-2">Valid</p>
-                            <p id="successful-cards" class="text-3xl font-bold text-emerald-400">0</p>
-                        </div>
-                        <div class="bg-dark-400 p-6 rounded-2xl border border-purple-800 text-center stat-card hover:border-red-600">
-                            <div class="flex items-center justify-center mb-3">
-                                <i class="fas fa-times-circle text-red-400 text-2xl"></i>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-2">Invalid</p>
-                            <p id="failed-cards" class="text-3xl font-bold text-red-400">0</p>
-                        </div>
-                    </div>
-                    <div class="space-y-6">
+                    <div class="space-y-5">
                         <div>
-                            <p class="text-sm text-gray-400 mb-3 flex items-center">
-                                <i class="fas fa-credit-card text-purple-400 mr-2"></i>
-                                Current Processing
-                            </p>
-                            <div id="current-card" class="bg-dark-500 p-4 rounded-xl font-mono text-sm border border-purple-800 text-center flex items-center justify-center min-h-[60px]">
-                                <i class="fas fa-hourglass-half text-gray-400 mr-2"></i>
-                                Awaiting cards...
-                            </div>
+                            <label for="cards-input" class="block text-sm font-semibold text-gray-300 mb-3 flex items-center">
+                                <i class="fas fa-list-ul text-purple-400 mr-2"></i>
+                                Cards (Format: CC|MM|YY|CVV)
+                            </label>
+                            <textarea id="cards-input" rows="10" class="w-full bg-dark-500 border border-purple-800 rounded-xl py-4 px-5 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-300 font-mono text-sm" placeholder="5577557193296184|05|2026|620
+5395937416657109|05|2026|364
+4895040589255203|12|2027|410"></textarea>
                         </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-3">
-                                <p class="text-sm text-gray-400 flex items-center">
-                                    <i class="fas fa-chart-line text-purple-400 mr-2"></i>
-                                    Progress
-                                </p>
-                                <span id="progress-percent" class="text-sm text-purple-400 font-semibold">0%</span>
-                            </div>
-                            <div class="w-full bg-dark-500 rounded-full h-4 border border-purple-800 overflow-hidden">
-                                <div id="progress-bar" class="progress-bar h-4 rounded-full transition-all duration-500 flex items-center justify-end pr-2" style="width: 0%">
-                                    <div class="w-2 h-2 bg-white rounded-full opacity-80"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
-                                <p class="text-xs text-gray-400 mb-1">Success Rate</p>
-                                <p id="success-rate" class="text-lg font-bold text-emerald-400">0%</p>
-                            </div>
-                            <div class="bg-dark-400 p-4 rounded-xl border border-purple-800 text-center">
-                                <p class="text-xs text-gray-400 mb-1">Speed</p>
-                                <p id="processing-speed" class="text-lg font-bold text-blue-400">0 c/m</p>
-                            </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <button id="start-btn" class="btn-success text-white font-semibold py-4 px-6 rounded-xl flex flex-col items-center justify-center">
+                                <i class="fas fa-play mb-1"></i>
+                                Start
+                            </button>
+                            <button id="pause-btn" class="btn-warning text-white font-semibold py-4 px-6 rounded-xl flex flex-col items-center justify-center" disabled>
+                                <i class="fas fa-pause mb-1"></i>
+                                Pause
+                            </button>
+                            <button id="stop-btn" class="btn-danger text-white font-semibold py-4 px-6 rounded-xl flex flex-col items-center justify-center" disabled>
+                                <i class="fas fa-stop mb-1"></i>
+                                Stop
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500">
+                    <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                        <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse sparkle"></div>
+                        <i class="fas fa-chart-pie mr-2"></i>
+                        Processing Status
+                    </h2>
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="stat-card card-bg rounded-xl p-4 text-center">
+                                <p class="text-xs text-gray-400 mb-1">Total Cards</p>
+                                <p id="total-cards" class="text-2xl font-bold text-white">0</p>
+                            </div>
+                            <div class="stat-card card-bg rounded-xl p-4 text-center">
+                                <p class="text-xs text-gray-400 mb-1">Processed</p>
+                                <p id="processed-cards" class="text-2xl font-bold text-white">0</p>
+                            </div>
+                            <div class="stat-card card-bg rounded-xl p-4 text-center">
+                                <p class="text-xs text-gray-400 mb-1">Successful</p>
+                                <p id="successful-cards" class="text-2xl font-bold text-green-400">0</p>
+                            </div>
+                            <div class="stat-card card-bg rounded-xl p-4 text-center">
+                                <p class="text-xs text-gray-400 mb-1">Failed</p>
+                                <p id="failed-cards" class="text-2xl font-bold text-red-400">0</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-400">Progress</p>
+                                <p id="progress-percent" class="text-sm font-semibold text-white">0%</p>
+                            </div>
+                            <div class="w-full h-3 bg-dark-500 rounded-full overflow-hidden">
+                                <div id="progress-bar" class="progress-bar h-full rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="card-bg rounded-xl p-4">
+                                <p class="text-xs text-gray-400 mb-1">Success Rate</p>
+                                <p id="success-rate" class="text-xl font-bold text-green-400">0%</p>
+                            </div>
+                            <div class="card-bg rounded-xl p-4">
+                                <p class="text-xs text-gray-400 mb-1">Processing Speed</p>
+                                <p id="processing-speed" class="text-xl font-bold text-blue-400">0 c/m</p>
+                            </div>
+                        </div>
+
+                        <div class="card-bg rounded-xl p-4">
+                            <p class="text-xs text-gray-400 mb-1">Current Card</p>
+                            <p id="current-card" class="text-sm font-mono text-white"><i class="fas fa-hourglass-half text-gray-400 mr-2"></i>Awaiting cards...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="xl:col-span-1 space-y-6">
+                <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 flex flex-col h-full">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold text-purple-300 flex items-center">
                             <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 animate-pulse sparkle"></div>
-                            <i class="fas fa-list-alt mr-2"></i>
+                            <i class="fas fa-clipboard-list mr-2"></i>
                             Results
                         </h2>
-                        <div class="flex items-center space-x-3">
-                            <button id="filter-all" class="px-3 py-1 rounded-lg text-xs bg-purple-600 text-white">All</button>
-                            <button id="filter-valid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Valid</button>
-                            <button id="filter-invalid" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Invalid</button>
+                        <div class="flex space-x-2">
+                            <button id="filter-all-btn" class="px-3 py-1 rounded-lg text-xs bg-purple-600 text-white">All</button>
+                            <button id="filter-valid-btn" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Valid</button>
+                            <button id="filter-invalid-btn" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white">Invalid</button>
                         </div>
                     </div>
-                    <div id="results-container" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <button id="clear-results-btn" class="px-3 py-1 rounded-lg text-xs bg-gray-600 text-white flex items-center">
+                            <i class="fas fa-trash-alt mr-1"></i>
+                            Clear
+                        </button>
+                        <button id="export-results-btn" class="px-3 py-1 rounded-lg text-xs bg-blue-600 text-white flex items-center">
+                            <i class="fas fa-download mr-1"></i>
+                            Export
+                        </button>
+                    </div>
+                    <div id="results-container" class="flex-1 overflow-y-auto space-y-3 pr-2" style="max-height: 600px;">
                         <div class="text-center text-gray-400 py-8">
                             <i class="fas fa-clipboard-list text-4xl mb-3 opacity-30"></i>
-                            <p>Results will appear here</p>
+                            <p>No results to display</p>
                         </div>
                     </div>
                 </div>
@@ -492,344 +450,354 @@
         </div>
     </div>
 
-    <!-- Modal for export options -->
-    <div id="export-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
-        <div class="card-bg glass-effect rounded-3xl p-7 shadow-2xl max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-purple-300">Export Results</h3>
-                <button id="close-export-modal" class="text-gray-400 hover:text-white">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden slide-in">
+        <div class="card-bg glass-effect rounded-xl p-4 shadow-2xl max-w-md">
+            <div class="flex items-start">
+                <div id="toast-icon" class="text-2xl mr-3 mt-1">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 id="toast-title" class="font-bold text-white mb-1">Notification</h3>
+                    <p id="toast-message" class="text-sm text-gray-300">This is a notification message.</p>
+                </div>
+                <button onclick="hideToast()" class="text-gray-400 hover:text-white ml-4">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-3">Export Format</label>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"></div>
+        <div class="card-bg glass-effect rounded-3xl p-8 shadow-2xl max-w-md relative z-10 slide-in">
+            <h2 class="text-xl font-bold mb-6 text-purple-300 flex items-center">
+                <i class="fas fa-download mr-2"></i>
+                Export Results
+            </h2>
+            <div class="space-y-6">
+                <div class="space-y-4">
+                    <p class="text-gray-300 text-sm">Choose export format and content:</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <button id="export-txt" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                        <button onclick="exportResults('txt', 'all')" class="btn-primary text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center">
                             <i class="fas fa-file-alt mr-2"></i>
-                            Text File
+                            All as TXT
                         </button>
-                        <button id="export-json" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                        <button onclick="exportResults('json', 'all')" class="btn-primary text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center">
                             <i class="fas fa-file-code mr-2"></i>
-                            JSON File
+                            All as JSON
                         </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-300 mb-3">Export Options</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button id="export-all" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
-                            <i class="fas fa-list mr-2"></i>
-                            All Results
-                        </button>
-                        <button id="export-valid" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center transition-all duration-300">
+                        <button onclick="exportResults('txt', 'valid')" class="btn-success text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center">
                             <i class="fas fa-check-circle mr-2"></i>
                             Valid Only
                         </button>
+                        <button onclick="exportResults('json', 'valid')" class="btn-success text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-double mr-2"></i>
+                            Valid as JSON
+                        </button>
                     </div>
                 </div>
+                <button onclick="hideExportModal()" class="w-full btn-danger text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Toast notification -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-dark-400 border border-purple-500 rounded-xl p-4 shadow-2xl hidden slide-in z-50 max-w-sm">
-        <div class="flex items-start">
-            <div id="toast-icon" class="text-xl mr-3 mt-1">
-                <i class="fas fa-info-circle text-blue-400"></i>
-            </div>
-            <div class="flex-1">
-                <h4 id="toast-title" class="font-bold text-gray-200 mb-1">Notification</h4>
-                <p id="toast-message" class="text-sm text-gray-300">This is a notification message.</p>
-            </div>
-            <button id="close-toast" class="text-gray-400 hover:text-white ml-2">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- JavaScript -->
     <script>
         // DOM Elements
         const shopifyUrlInput = document.getElementById('shopify-url');
-        const checkUrlBtn = document.getElementById('check-url-btn');
-        const urlResult = document.getElementById('url-result');
-        
         const customProxyInput = document.getElementById('custom-proxy');
-        const checkProxyBtn = document.getElementById('check-proxy-btn');
-        const proxyResult = document.getElementById('proxy-result');
-        
         const telegramTokenInput = document.getElementById('telegram-token');
         const telegramUserIdInput = document.getElementById('telegram-user-id');
-        const testTelegramBtn = document.getElementById('test-telegram-btn');
-        
         const cardsInput = document.getElementById('cards-input');
-        const cardsFileInput = document.getElementById('cards-file');
-        const cardCountDisplay = document.getElementById('card-count-display');
         
+        const checkUrlBtn = document.getElementById('check-url-btn');
+        const checkProxyBtn = document.getElementById('check-proxy-btn');
+        const testTelegramBtn = document.getElementById('test-telegram-btn');
         const startBtn = document.getElementById('start-btn');
         const pauseBtn = document.getElementById('pause-btn');
         const stopBtn = document.getElementById('stop-btn');
-        const clearBtn = document.getElementById('clear-btn');
-        const exportBtn = document.getElementById('export-btn');
+        
+        const urlResult = document.getElementById('url-result');
+        const proxyResult = document.getElementById('proxy-result');
         
         const totalCardsDisplay = document.getElementById('total-cards');
         const processedCardsDisplay = document.getElementById('processed-cards');
         const successfulCardsDisplay = document.getElementById('successful-cards');
         const failedCardsDisplay = document.getElementById('failed-cards');
-        const currentCardDisplay = document.getElementById('current-card');
         const progressBar = document.getElementById('progress-bar');
         const progressPercent = document.getElementById('progress-percent');
         const successRateDisplay = document.getElementById('success-rate');
         const processingSpeedDisplay = document.getElementById('processing-speed');
+        const currentCardDisplay = document.getElementById('current-card');
         
         const resultsContainer = document.getElementById('results-container');
-        const filterAllBtn = document.getElementById('filter-all');
-        const filterValidBtn = document.getElementById('filter-valid');
-        const filterInvalidBtn = document.getElementById('filter-invalid');
-        
-        const exportModal = document.getElementById('export-modal');
-        const closeExportModalBtn = document.getElementById('close-export-modal');
-        const exportTxtBtn = document.getElementById('export-txt');
-        const exportJsonBtn = document.getElementById('export-json');
-        const exportAllBtn = document.getElementById('export-all');
-        const exportValidBtn = document.getElementById('export-valid');
+        const filterAllBtn = document.getElementById('filter-all-btn');
+        const filterValidBtn = document.getElementById('filter-valid-btn');
+        const filterInvalidBtn = document.getElementById('filter-invalid-btn');
+        const clearResultsBtn = document.getElementById('clear-results-btn');
+        const exportResultsBtn = document.getElementById('export-results-btn');
         
         const toast = document.getElementById('toast');
+        const toastIcon = document.getElementById('toast-icon');
         const toastTitle = document.getElementById('toast-title');
         const toastMessage = document.getElementById('toast-message');
-        const toastIcon = document.getElementById('toast-icon');
-        const closeToastBtn = document.getElementById('close-toast');
         
-        // Global variables
+        const exportModal = document.getElementById('export-modal');
+
+        // Variables
         let isProcessing = false;
         let isPaused = false;
         let statusInterval = null;
-        let startTime = null;
-        let currentFilter = 'all';
         let results = [];
-        
-        // Initialize
-        updateCardCount();
-        
+        let currentFilter = 'all';
+        let startTime = null;
+
         // Event Listeners
-        checkUrlBtn.addEventListener('click', checkShopifyUrl);
+        checkUrlBtn.addEventListener('click', checkUrl);
         checkProxyBtn.addEventListener('click', checkProxy);
         testTelegramBtn.addEventListener('click', testTelegram);
-        cardsInput.addEventListener('input', updateCardCount);
-        cardsFileInput.addEventListener('change', handleFileUpload);
-        
         startBtn.addEventListener('click', startProcess);
         pauseBtn.addEventListener('click', pauseProcess);
         stopBtn.addEventListener('click', stopProcess);
-        clearBtn.addEventListener('click', clearResults);
-        exportBtn.addEventListener('click', showExportModal);
         
         filterAllBtn.addEventListener('click', () => filterResults('all'));
         filterValidBtn.addEventListener('click', () => filterResults('valid'));
         filterInvalidBtn.addEventListener('click', () => filterResults('invalid'));
-        
-        closeExportModalBtn.addEventListener('click', hideExportModal);
-        exportTxtBtn.addEventListener('click', () => exportResults('txt', 'all'));
-        exportJsonBtn.addEventListener('click', () => exportResults('json', 'all'));
-        exportAllBtn.addEventListener('click', () => exportResults('txt', 'all'));
-        exportValidBtn.addEventListener('click', () => exportResults('txt', 'valid'));
-        
-        closeToastBtn.addEventListener('click', hideToast);
-        
+        clearResultsBtn.addEventListener('click', clearResults);
+        exportResultsBtn.addEventListener('click', showExportModal);
+
         // Functions
-        function updateCardCount() {
-            const cards = cardsInput.value.split('\n').filter(line => line.trim() !== '');
-            const count = cards.length;
-            cardCountDisplay.textContent = `${count} card${count !== 1 ? 's' : ''}`;
-            totalCardsDisplay.textContent = count;
-        }
-        
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                cardsInput.value = e.target.result;
-                updateCardCount();
-                showToast('success', 'File Uploaded', `Loaded ${cardsInput.value.split('\n').filter(line => line.trim() !== '').length} cards from file.`);
-            };
-            reader.readAsText(file);
-        }
-        
-        async function checkShopifyUrl() {
+        async function checkUrl() {
             const url = shopifyUrlInput.value.trim();
             if (!url) {
                 showToast('error', 'Validation Error', 'Please enter a Shopify URL.');
                 return;
             }
-            
-            urlResult.innerHTML = '<div class="flex items-center justify-center"><i class="fas fa-spinner fa-spin text-purple-400 mr-2"></i> Validating URL...</div>';
-            urlResult.classList.remove('hidden', 'result-success', 'result-error');
-            urlResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
-            
+
+            // Show loading state
+            checkUrlBtn.disabled = true;
+            checkUrlBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Validating...';
+            urlResult.classList.add('hidden');
+
             try {
                 const response = await fetch('/api/check_url', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         url: url,
                         proxy: customProxyInput.value.trim() || null
                     })
                 });
-                
+
                 const data = await response.json();
+
+                // Reset button
+                checkUrlBtn.disabled = false;
+                checkUrlBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Validate URL';
+
+                // Show result
+                urlResult.classList.remove('hidden');
                 
                 if (data.status) {
+                    urlResult.className = 'result-success p-4 rounded-xl text-sm slide-in';
                     urlResult.innerHTML = `
-                        <div class="flex items-center text-emerald-400 mb-2">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            <span class="font-semibold">Valid Shopify Product</span>
-                        </div>
-                        <div class="text-gray-300 text-xs space-y-1">
-                            <p><span class="text-gray-400">Product:</span> ${data.title}</p>
-                            <p><span class="text-gray-400">Price:</span> ${data.price}</p>
-                            <p><span class="text-gray-400">Variant ID:</span> ${data.variant_id}</p>
+                        <div class="flex items-start">
+                            <div class="text-xl mr-3 mt-1">
+                                <i class="fas fa-check-circle text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white mb-1">${data.title || 'Valid Product'}</p>
+                                <p class="text-gray-300">Price: ${data.price || 'Unknown'}</p>
+                                <p class="text-gray-300">Variant ID: ${data.variant_id || 'Unknown'}</p>
+                            </div>
                         </div>
                     `;
-                    urlResult.classList.remove('bg-dark-500', 'border-purple-800');
-                    urlResult.classList.add('result-success');
+                    showToast('success', 'URL Validation', 'Product URL is valid and ready for processing.');
                 } else {
+                    urlResult.className = 'result-error p-4 rounded-xl text-sm slide-in';
                     urlResult.innerHTML = `
-                        <div class="flex items-center text-red-400">
-                            <i class="fas fa-times-circle mr-2"></i>
-                            <span class="font-semibold">Invalid URL</span>
+                        <div class="flex items-start">
+                            <div class="text-xl mr-3 mt-1">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white mb-1">Invalid Product URL</p>
+                                <p class="text-gray-300">${data.message || 'Could not validate the URL.'}</p>
+                            </div>
                         </div>
-                        <p class="text-gray-300 text-xs mt-1">${data.message}</p>
                     `;
-                    urlResult.classList.remove('bg-dark-500', 'border-purple-800');
-                    urlResult.classList.add('result-error');
+                    showToast('error', 'URL Validation', data.message || 'Could not validate the URL.');
                 }
             } catch (error) {
+                // Reset button
+                checkUrlBtn.disabled = false;
+                checkUrlBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Validate URL';
+
+                // Show error
+                urlResult.classList.remove('hidden');
+                urlResult.className = 'result-error p-4 rounded-xl text-sm slide-in';
                 urlResult.innerHTML = `
-                    <div class="flex items-center text-red-400">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span class="font-semibold">Error</span>
+                    <div class="flex items-start">
+                        <div class="text-xl mr-3 mt-1">
+                            <i class="fas fa-times-circle text-red-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white mb-1">Error</p>
+                            <p class="text-gray-300">${error.message}</p>
+                        </div>
                     </div>
-                    <p class="text-gray-300 text-xs mt-1">Failed to validate URL: ${error.message}</p>
                 `;
-                urlResult.classList.remove('bg-dark-500', 'border-purple-800');
-                urlResult.classList.add('result-error');
+                showToast('error', 'URL Validation', 'An error occurred while validating the URL.');
             }
         }
-        
+
         async function checkProxy() {
             const proxy = customProxyInput.value.trim();
-            
-            proxyResult.innerHTML = '<div class="flex items-center justify-center"><i class="fas fa-spinner fa-spin text-purple-400 mr-2"></i> Testing proxy...</div>';
-            proxyResult.classList.remove('hidden', 'result-success', 'result-error');
-            proxyResult.classList.add('bg-dark-500', 'border', 'border-purple-800');
-            
+            if (!proxy) {
+                showToast('warning', 'Proxy Validation', 'No proxy specified. Will test default connection.');
+            }
+
+            // Show loading state
+            checkProxyBtn.disabled = true;
+            checkProxyBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Testing...';
+            proxyResult.classList.add('hidden');
+
             try {
                 const response = await fetch('/api/check_proxy', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ proxy: proxy || null })
+                    body: JSON.stringify({
+                        proxy: proxy || null
+                    })
                 });
-                
+
                 const data = await response.json();
+
+                // Reset button
+                checkProxyBtn.disabled = false;
+                checkProxyBtn.innerHTML = '<i class="fas fa-wifi mr-2"></i>Test Proxy';
+
+                // Show result
+                proxyResult.classList.remove('hidden');
                 
                 if (data.status) {
+                    proxyResult.className = 'result-success p-4 rounded-xl text-sm slide-in';
                     proxyResult.innerHTML = `
-                        <div class="flex items-center text-emerald-400 mb-1">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            <span class="font-semibold">Proxy Working</span>
+                        <div class="flex items-start">
+                            <div class="text-xl mr-3 mt-1">
+                                <i class="fas fa-check-circle text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white mb-1">Proxy Working</p>
+                                <p class="text-gray-300">IP: ${data.ip || 'Unknown'}</p>
+                            </div>
                         </div>
-                        <p class="text-gray-300 text-xs">IP: ${data.ip}</p>
                     `;
-                    proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
-                    proxyResult.classList.add('result-success');
+                    showToast('success', 'Proxy Test', 'Proxy is working correctly.');
                 } else {
+                    proxyResult.className = 'result-error p-4 rounded-xl text-sm slide-in';
                     proxyResult.innerHTML = `
-                        <div class="flex items-center text-red-400">
-                            <i class="fas fa-times-circle mr-2"></i>
-                            <span class="font-semibold">Proxy Error</span>
+                        <div class="flex items-start">
+                            <div class="text-xl mr-3 mt-1">
+                                <i class="fas fa-times-circle text-red-400"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white mb-1">Proxy Error</p>
+                                <p class="text-gray-300">${data.message || 'Could not connect using the proxy.'}</p>
+                            </div>
                         </div>
-                        <p class="text-gray-300 text-xs mt-1">${data.message}</p>
                     `;
-                    proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
-                    proxyResult.classList.add('result-error');
+                    showToast('error', 'Proxy Test', data.message || 'Could not connect using the proxy.');
                 }
             } catch (error) {
+                // Reset button
+                checkProxyBtn.disabled = false;
+                checkProxyBtn.innerHTML = '<i class="fas fa-wifi mr-2"></i>Test Proxy';
+
+                // Show error
+                proxyResult.classList.remove('hidden');
+                proxyResult.className = 'result-error p-4 rounded-xl text-sm slide-in';
                 proxyResult.innerHTML = `
-                    <div class="flex items-center text-red-400">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span class="font-semibold">Error</span>
+                    <div class="flex items-start">
+                        <div class="text-xl mr-3 mt-1">
+                            <i class="fas fa-times-circle text-red-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white mb-1">Error</p>
+                            <p class="text-gray-300">${error.message}</p>
+                        </div>
                     </div>
-                    <p class="text-gray-300 text-xs mt-1">Failed to test proxy: ${error.message}</p>
                 `;
-                proxyResult.classList.remove('bg-dark-500', 'border-purple-800');
-                proxyResult.classList.add('result-error');
+                showToast('error', 'Proxy Test', 'An error occurred while testing the proxy.');
             }
         }
-        
+
         async function testTelegram() {
             const token = telegramTokenInput.value.trim();
             const userId = telegramUserIdInput.value.trim();
-            
-            if (!token || !userId) {
-                showToast('error', 'Validation Error', 'Please enter both Telegram Bot Token and User ID.');
+
+            if (!token) {
+                showToast('error', 'Telegram Test', 'Please enter a Telegram bot token.');
                 return;
             }
-            
-            showToast('info', 'Sending Test Message', 'Attempting to send a test message to Telegram...', true);
-            
+
+            if (!userId) {
+                showToast('error', 'Telegram Test', 'Please enter a Telegram user ID.');
+                return;
+            }
+
+            // Show loading state
+            testTelegramBtn.disabled = true;
+            testTelegramBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Testing...';
+
             try {
-                // We'll use a simple approach to test Telegram by sending a test card through the processing API
-                const testCard = '4111111111111111|01|2025|123';
-                const response = await fetch('/api/start_process', {
+                const response = await fetch('/api/test_telegram', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        cards: testCard,
-                        shopify_url: shopifyUrlInput.value.trim() || 'https://example.myshopify.com/products/test',
                         telegram_bot_token: token,
-                        telegram_user_id: userId,
-                        custom_proxy: customProxyInput.value.trim() || null
+                        telegram_user_id: userId
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
+                // Reset button
+                testTelegramBtn.disabled = false;
+                testTelegramBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Test Notifications';
+
                 if (data.status) {
                     showToast('success', 'Telegram Test', 'Test message sent! Check your Telegram for the notification.');
                 } else {
                     showToast('error', 'Telegram Error', `Failed to send test message: ${data.message}`);
                 }
-                
-                // Stop the process after a short delay
-                setTimeout(async () => {
-                    await fetch('/api/stop_process', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                }, 2000);
-                
             } catch (error) {
+                // Reset button
+                testTelegramBtn.disabled = false;
+                testTelegramBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Test Notifications';
+                
                 showToast('error', 'Telegram Error', `Failed to send test message: ${error.message}`);
             }
         }
-        
+
         async function startProcess() {
             const url = shopifyUrlInput.value.trim();
             const cards = cardsInput.value.trim();
-            
+
             if (!url) {
                 showToast('error', 'Validation Error', 'Please enter a Shopify URL.');
                 return;
             }
-            
+
             if (!cards) {
                 showToast('error', 'Validation Error', 'Please enter at least one card.');
                 return;
             }
-            
+
             try {
                 const response = await fetch('/api/start_process', {
                     method: 'POST',
@@ -842,26 +810,26 @@
                         custom_proxy: customProxyInput.value.trim() || null
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.status) {
                     isProcessing = true;
                     isPaused = false;
                     startTime = Date.now();
-                    
+
                     // Update UI
                     startBtn.disabled = true;
                     pauseBtn.disabled = false;
                     stopBtn.disabled = false;
-                    
+
                     // Clear previous results
                     results = [];
                     updateResultsDisplay();
-                    
+
                     // Start status polling
                     statusInterval = setInterval(fetchStatus, 1000);
-                    
+
                     showToast('success', 'Process Started', 'Card processing has started.');
                 } else {
                     showToast('error', 'Start Error', `Failed to start process: ${data.message}`);
@@ -870,19 +838,19 @@
                 showToast('error', 'Start Error', `Failed to start process: ${error.message}`);
             }
         }
-        
+
         async function pauseProcess() {
             try {
                 const response = await fetch('/api/pause_process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.status) {
                     isPaused = data.paused;
-                    
+
                     if (isPaused) {
                         pauseBtn.innerHTML = '<i class="fas fa-play mb-1"></i>Resume';
                         pauseBtn.classList.remove('btn-warning');
@@ -901,19 +869,19 @@
                 showToast('error', 'Pause Error', `Failed to pause/resume process: ${error.message}`);
             }
         }
-        
+
         async function stopProcess() {
             try {
                 const response = await fetch('/api/stop_process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.status) {
                     showToast('info', 'Process Stopping', 'Card processing is being stopped...');
-                    
+
                     // We'll let the status polling handle the UI updates
                 } else {
                     showToast('error', 'Stop Error', `Failed to stop process: ${data.message}`);
@@ -922,52 +890,52 @@
                 showToast('error', 'Stop Error', `Failed to stop process: ${error.message}`);
             }
         }
-        
+
         async function fetchStatus() {
             try {
                 const response = await fetch('/api/status');
                 const data = await response.json();
-                
+
                 // Update statistics
                 totalCardsDisplay.textContent = data.total_cards;
                 processedCardsDisplay.textContent = data.processed_cards;
                 successfulCardsDisplay.textContent = data.successful_cards;
                 failedCardsDisplay.textContent = data.failed_cards;
-                
+
                 // Update current card
                 if (data.current_card) {
                     currentCardDisplay.innerHTML = `<span class="font-mono">${data.current_card}</span>`;
                 } else {
                     currentCardDisplay.innerHTML = '<i class="fas fa-hourglass-half text-gray-400 mr-2"></i>Awaiting cards...';
                 }
-                
+
                 // Update progress
                 const progress = data.total_cards > 0 ? (data.processed_cards / data.total_cards) * 100 : 0;
                 progressBar.style.width = `${progress}%`;
                 progressPercent.textContent = `${Math.round(progress)}%`;
-                
+
                 // Update success rate
                 const successRate = data.processed_cards > 0 ? (data.successful_cards / data.processed_cards) * 100 : 0;
                 successRateDisplay.textContent = `${Math.round(successRate)}%`;
-                
+
                 // Update processing speed
                 if (startTime) {
                     const elapsedMinutes = (Date.now() - startTime) / 60000;
                     const cardsPerMinute = elapsedMinutes > 0 ? Math.round(data.processed_cards / elapsedMinutes) : 0;
                     processingSpeedDisplay.textContent = `${cardsPerMinute} c/m`;
                 }
-                
+
                 // Update results
                 if (data.results && data.results.length > results.length) {
                     results = data.results;
                     updateResultsDisplay();
                 }
-                
+
                 // Check if process has stopped
                 if (!data.is_running && isProcessing) {
                     isProcessing = false;
                     clearInterval(statusInterval);
-                    
+
                     // Reset UI
                     startBtn.disabled = false;
                     pauseBtn.disabled = true;
@@ -975,27 +943,27 @@
                     pauseBtn.innerHTML = '<i class="fas fa-pause mb-1"></i>Pause';
                     pauseBtn.classList.remove('btn-success');
                     pauseBtn.classList.add('btn-warning');
-                    
+
                     showToast('success', 'Process Complete', 'Card processing has completed.');
                 }
             } catch (error) {
                 console.error('Error fetching status:', error);
             }
         }
-        
+
         function updateResultsDisplay() {
             // Filter results based on current filter
             let filteredResults = results;
-            
+
             if (currentFilter === 'valid') {
                 filteredResults = results.filter(result => result.status);
             } else if (currentFilter === 'invalid') {
                 filteredResults = results.filter(result => !result.status);
             }
-            
+
             // Clear container
             resultsContainer.innerHTML = '';
-            
+
             // Add results
             if (filteredResults.length === 0) {
                 resultsContainer.innerHTML = `
@@ -1006,11 +974,11 @@
                 `;
                 return;
             }
-            
+
             filteredResults.forEach(result => {
                 const resultElement = document.createElement('div');
                 resultElement.className = result.status ? 'result-success rounded-xl p-4' : 'result-error rounded-xl p-4';
-                
+
                 resultElement.innerHTML = `
                     <div class="flex items-start">
                         <div class="text-xl mr-3 mt-1">
@@ -1026,26 +994,26 @@
                         </div>
                     </div>
                 `;
-                
+
                 resultsContainer.appendChild(resultElement);
             });
         }
-        
+
         function filterResults(filter) {
             currentFilter = filter;
-            
+
             // Update filter buttons
             filterAllBtn.className = filter === 'all' ? 'px-3 py-1 rounded-lg text-xs bg-purple-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
             filterValidBtn.className = filter === 'valid' ? 'px-3 py-1 rounded-lg text-xs bg-emerald-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
             filterInvalidBtn.className = filter === 'invalid' ? 'px-3 py-1 rounded-lg text-xs bg-red-600 text-white' : 'px-3 py-1 rounded-lg text-xs bg-gray-600 text-white';
-            
+
             updateResultsDisplay();
         }
-        
+
         function clearResults() {
             results = [];
             updateResultsDisplay();
-            
+
             // Reset statistics
             totalCardsDisplay.textContent = '0';
             processedCardsDisplay.textContent = '0';
@@ -1056,39 +1024,39 @@
             successRateDisplay.textContent = '0%';
             processingSpeedDisplay.textContent = '0 c/m';
             currentCardDisplay.innerHTML = '<i class="fas fa-hourglass-half text-gray-400 mr-2"></i>Awaiting cards...';
-            
+
             showToast('info', 'Results Cleared', 'All results have been cleared.');
         }
-        
+
         function showExportModal() {
             if (results.length === 0) {
                 showToast('error', 'Export Error', 'No results to export.');
                 return;
             }
-            
+
             exportModal.classList.remove('hidden');
         }
-        
+
         function hideExportModal() {
             exportModal.classList.add('hidden');
         }
-        
+
         function exportResults(format, type) {
             // Filter results if needed
             let dataToExport = results;
             if (type === 'valid') {
                 dataToExport = results.filter(result => result.status);
             }
-            
+
             if (dataToExport.length === 0) {
                 showToast('error', 'Export Error', 'No results to export.');
                 hideExportModal();
                 return;
             }
-            
+
             let content = '';
             let filename = '';
-            
+
             if (format === 'txt') {
                 // Format as text
                 dataToExport.forEach(result => {
@@ -1100,7 +1068,7 @@
                 content = JSON.stringify(dataToExport, null, 2);
                 filename = `card_results_${new Date().toISOString().slice(0, 10)}.json`;
             }
-            
+
             // Create download link
             const blob = new Blob([content], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1111,16 +1079,16 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             hideExportModal();
             showToast('success', 'Export Complete', `Results exported to ${filename}`);
         }
-        
+
         function showToast(type, title, message, autoHide = true) {
             // Set toast content
             toastTitle.textContent = title;
             toastMessage.textContent = message;
-            
+
             // Set toast icon
             if (type === 'success') {
                 toastIcon.innerHTML = '<i class="fas fa-check-circle text-emerald-400"></i>';
@@ -1131,16 +1099,16 @@
             } else {
                 toastIcon.innerHTML = '<i class="fas fa-info-circle text-blue-400"></i>';
             }
-            
+
             // Show toast
             toast.classList.remove('hidden');
-            
+
             // Auto-hide after 5 seconds
             if (autoHide) {
                 setTimeout(hideToast, 5000);
             }
         }
-        
+
         function hideToast() {
             toast.classList.add('hidden');
         }
